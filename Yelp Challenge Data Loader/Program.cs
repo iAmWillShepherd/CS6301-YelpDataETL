@@ -205,7 +205,7 @@ namespace ConsoleApplication
 
                         var user = new {
                             obj.user_id,
-                            obj.name,
+                            name = obj.name,
                             obj.review_count,
                             obj.average_stars,
                             yelping_since = ((string)obj.yelping_since) + "-01",
@@ -214,7 +214,19 @@ namespace ConsoleApplication
 
                         var elite = new List<int>();
                         var friends = new List<string>();
-                        var compliments = new Dictionary<string, int>();
+                        var compliments = new Dictionary<string, int> {
+                            { "profile", 0},
+                            { "cute", 0},
+                            { "funny", 0},
+                            { "plain", 0},
+                            { "writer", 0},
+                            { "list", 0},
+                            { "note", 0},
+                            { "photos", 0},
+                            { "hot", 0},
+                            { "cool", 0},
+                            { "more", 0},
+                        };
                         var votes = new Dictionary<string, int>();
                         
                         foreach (var year in obj.elite)
@@ -229,7 +241,8 @@ namespace ConsoleApplication
 
                         foreach (var kvp in obj.compliments)
                         {
-                            compliments.Add(kvp.Name, (int)kvp.Value.Value);
+                            if (compliments.ContainsKey(kvp.Name))
+                                compliments[kvp.Name] = (int)kvp.Value.Value;
                         }
 
                         foreach (var kvp in obj.votes)
@@ -248,10 +261,16 @@ namespace ConsoleApplication
 
                 connection.Open();
                 var transaction = connection.BeginTransaction();
+
                 try
                 {
                     foreach (var obj in objs)
                     {
+                        if (((string)obj.user.name).Contains("\xE9"))
+                        {
+                            break;
+                        }
+
                         connection.Execute(userSql, obj.user);
 
                         connection.Execute(
@@ -269,7 +288,7 @@ namespace ConsoleApplication
                                 hot = obj.compliments["hot"],
                                 cool = obj.compliments["cool"],
                                 more = obj.compliments["more"]
-                            });
+                            }, transaction);
 
                         connection.Execute(
                             votesSql,
@@ -278,7 +297,7 @@ namespace ConsoleApplication
                                 funny = obj.votes["funny"],
                                 useful = obj.votes["useful"],
                                 cool = obj.votes["cool"]
-                            });
+                            }, transaction);
 
                         foreach (var year in obj.yearsElite)
                         {
@@ -287,7 +306,7 @@ namespace ConsoleApplication
                                 new {
                                     obj.user.user_id,
                                     year
-                                });
+                                }, transaction);
                         }
 
                         foreach (var friend in obj.friends)
@@ -297,14 +316,15 @@ namespace ConsoleApplication
                                 new {
                                     user_id = obj.user.user_id,
                                     friend_user_id = friend
-                                });
+                                }, transaction);
                         }
                     }
 
                     transaction.Commit();
                 }
-                catch
+                catch (MySqlException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     transaction.Rollback();
 
                     throw;

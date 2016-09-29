@@ -1,5 +1,5 @@
---temp-output:/Users/iamwill/Desktop/hwapp/obj/Debug/netcoreapp1.0/
---out:/Users/iamwill/Desktop/hwapp/bin/Debug/netcoreapp1.0/hwapp.dll
+--temp-output:/Users/iamwill/Code/Data-Visualization/Yelp Challenge Data Loader/obj/Debug/netcoreapp1.0/
+--out:/Users/iamwill/Code/Data-Visualization/Yelp Challenge Data Loader/bin/Debug/netcoreapp1.0/Yelp Challenge Data Loader.dll
 --define:DEBUG
 --define:TRACE
 --define:NETCOREAPP1_0
@@ -9,7 +9,7 @@
 --optimize:False
 --debug-type:portable
 --emit-entry-point:True
---output-name:hwapp
+--output-name:Yelp Challenge Data Loader
 --file-version:1.0.0.0
 --version:1.0.0.0
 --informational-version:1.0.0
@@ -115,4 +115,4 @@
 --reference:/Users/iamwill/.nuget/packages/System.Xml.ReaderWriter/4.0.11/ref/netstandard1.3/System.Xml.ReaderWriter.dll
 --reference:/Users/iamwill/.nuget/packages/System.Xml.XDocument/4.0.11/ref/netstandard1.3/System.Xml.XDocument.dll
 --reference:/Users/iamwill/.nuget/packages/System.Xml.XmlDocument/4.0.1/ref/netstandard1.3/System.Xml.XmlDocument.dll
-/Users/iamwill/Desktop/hwapp/Program.cs
+/Users/iamwill/Code/Data-Visualization/Yelp Challenge Data Loader/Program.cs

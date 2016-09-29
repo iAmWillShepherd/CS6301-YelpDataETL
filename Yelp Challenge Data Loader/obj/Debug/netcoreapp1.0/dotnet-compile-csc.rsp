@@ -7,8 +7,8 @@
 -debug:portable
 -nostdlib
 -nologo
-"/Users/iamwill/Desktop/hwapp/obj/Debug/netcoreapp1.0/dotnet-compile.assemblyinfo.cs"
--out:"/Users/iamwill/Desktop/hwapp/bin/Debug/netcoreapp1.0/hwapp.dll"
+"/Users/iamwill/Code/Data-Visualization/Yelp Challenge Data Loader/obj/Debug/netcoreapp1.0/dotnet-compile.assemblyinfo.cs"
+-out:"/Users/iamwill/Code/Data-Visualization/Yelp Challenge Data Loader/bin/Debug/netcoreapp1.0/Yelp Challenge Data Loader.dll"
 -r:"/Users/iamwill/.nuget/packages/Dapper/1.50.2/lib/netstandard1.3/Dapper.dll"
 -r:"/Users/iamwill/.nuget/packages/Google.Protobuf/3.0.0/lib/netstandard1.0/Google.Protobuf.dll"
 -r:"/Users/iamwill/.nuget/packages/Microsoft.CSharp/4.0.1/ref/netstandard1.0/Microsoft.CSharp.dll"
@@ -110,4 +110,4 @@
 -r:"/Users/iamwill/.nuget/packages/System.Xml.ReaderWriter/4.0.11/ref/netstandard1.3/System.Xml.ReaderWriter.dll"
 -r:"/Users/iamwill/.nuget/packages/System.Xml.XDocument/4.0.11/ref/netstandard1.3/System.Xml.XDocument.dll"
 -r:"/Users/iamwill/.nuget/packages/System.Xml.XmlDocument/4.0.1/ref/netstandard1.3/System.Xml.XmlDocument.dll"
-"/Users/iamwill/Desktop/hwapp/Program.cs"
+"/Users/iamwill/Code/Data-Visualization/Yelp Challenge Data Loader/Program.cs"

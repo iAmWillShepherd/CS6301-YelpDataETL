@@ -14,7 +14,7 @@ namespace ConsoleApplication
 
         public static void Main(string[] args)
         {
-            LoadReviews(connection);
+            LoadTips(connection);
 
             Console.WriteLine("Completed loading...");
         }
@@ -23,7 +23,7 @@ namespace ConsoleApplication
 
         private static void LoadReviews(MySqlConnection connection)
         {
-            var sqlFormat = 
+            var sql = 
                 @"INSERT INTO review (
                     business_id,
                     user_id,
@@ -42,32 +42,30 @@ namespace ConsoleApplication
                     @votes_funny,
                     @votes_useful,
                     @votes_cool);";
+
+            var objs = File
+                .ReadLines(GetFullFilename("review"))
+                .Select(x => JsonConvert.DeserializeObject(x))
+                .Select(x => {
+                    dynamic obj = x;
+
+                    return new {
+                        obj.business_id,
+                        obj.user_id,
+                        obj.stars,
+                        obj.text,
+                        obj.date,
+                        votes_funny = obj.votes?.funny,
+                        votes_useful = obj.votes?.useful,
+                        votes_cool = obj.votes?.cool
+                    };
+                });
+
+            connection.Open();
+
             try
             {
-                connection.Open();
-
-                var jsonObjs = File
-                    .ReadLines(GetFullFilename("review"))
-                    .Select(x => JsonConvert.DeserializeObject(x))
-                    .Select(x => {
-                        dynamic obj = x;
-
-                        return new {
-                            obj.business_id,
-                            obj.user_id,
-                            obj.stars,
-                            obj.text,
-                            obj.date,
-                            votes_funny = obj.votes?.funny,
-                            votes_useful = obj.votes?.useful,
-                            votes_cool = obj.votes?.cool
-                        };
-                    });
-
-                foreach (var obj in jsonObjs) 
-                {
-                    connection.Execute(sqlFormat, obj);
-                }			
+                connection.Execute(sql, objs);		
             }
             finally
             {
@@ -76,12 +74,48 @@ namespace ConsoleApplication
             }	
         }
 
-        private static void LoadTips()
+        private static void LoadTips(MySqlConnection connection)
         {
-            foreach (var line in File.ReadLines(GetFullFilename("business")))
-            {
+            var sql = 
+                @"INSERT INTO tip (
+                    text,
+                    business_id,
+                    user_id,
+                    date,
+                    likes)
+                VALUES (
+                    @text,
+                    @business_id,
+                    @user_id,
+                    @date,
+                    @likes);";
 
-            }
+            var objs = File
+                .ReadLines(GetFullFilename("tip"))
+                .Select(x => JsonConvert.DeserializeObject(x))
+                .Select(x => {
+                    dynamic obj = x;
+
+                    return new {
+                        obj.text,
+                        obj.business_id,
+                        obj.user_id,
+                        obj.date,
+                        obj.likes
+                    };
+                });
+
+                connection.Open();
+
+                try
+                {
+                    connection.Execute(sql, objs);
+                }
+                finally
+                {
+                    connection.Close();
+                    connection.Dispose();
+                }
         }
 
         private static void LoadBusinesses()
@@ -89,7 +123,12 @@ namespace ConsoleApplication
 
         }
 
-        private static void ImportUsers()
+        private static void LoadUsers()
+        {
+
+        }
+
+        private static void LoadCheckins()
         {
 
         }

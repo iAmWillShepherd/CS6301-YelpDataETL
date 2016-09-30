@@ -1,10 +1,5 @@
 ﻿using System;
 using MySql.Data.MySqlClient;
-using Dapper;
-using System.IO;
-using Newtonsoft.Json;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace YelpDataLoader
 {

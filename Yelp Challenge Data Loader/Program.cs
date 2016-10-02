@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace YelpDataLoader
@@ -10,6 +12,16 @@ namespace YelpDataLoader
         public static void Main(string[] args)
         {
             BusinessLoader.Load(connection);
+
+            var loaders = new List<Task> {
+                Task.Run(() => BusinessLoader.Load(connection)),
+                Task.Run(() => CheckinLoader.Load(connection)),
+                Task.Run(() => ReviewLoader.Load(connection)),
+                Task.Run(() => TipLoader.Load(connection)),
+                Task.Run(() => UserLoader.Load(connection))
+            };
+
+            Task.WaitAll(loaders.ToArray());
 
             Console.WriteLine("Completed loading...");
         }

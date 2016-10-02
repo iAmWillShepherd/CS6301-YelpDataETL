@@ -65,7 +65,7 @@ namespace YelpDataLoader
             @hour_22,
             @hour_23);";
 
-        private static void Load(IDbConnection connection)
+        public static void Load(IDbConnection connection)
         {
             var objs = File.ReadLines(Helpers.GetFullFilename("checkin"))
                 .Select(x => JsonConvert.DeserializeObject(x))

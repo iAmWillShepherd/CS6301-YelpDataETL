@@ -22,7 +22,7 @@ namespace YelpDataLoader
                 @date,
                 @likes);";
 
-        private static void Load(IDbConnection connection)
+        public static void Load(IDbConnection connection)
         {
             var objs = File
                 .ReadLines(Helpers.GetFullFilename("tip"))

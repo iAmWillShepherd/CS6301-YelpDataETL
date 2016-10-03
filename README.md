@@ -13,6 +13,16 @@
 1. Connect to your instance of MySQL
 1. Perform a data import with `/data/yelp_db.sql`. Make sure to select *Import from Self-Contained File*. [See documentation](https://dev.mysql.com/doc/workbench/en/wb-admin-export-import-management.html)
 
+# Prepare to run
+
+1. Download the dataset from [Yelp]()
+1. Copy the following files into `/data`
+  * _yelp_academic_dataset_business.json_
+  * _yelp_academic_dataset_checkin.json_
+  * _yelp_academic_dataset_review.json_
+  * _yelp_academic_dataset_tip.json_
+  * _yelp_academic_dataset_user.json_
+
 # Run
 
 1. Use Windows Command Prompt to navigate to the direcotry you downloaded this project to

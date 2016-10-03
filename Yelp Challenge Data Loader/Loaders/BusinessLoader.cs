@@ -56,6 +56,9 @@ namespace YelpDataLoader
 
         public static void Load(IDbConnection connection)
         {
+            var categories = new HashSet<string>();
+            var attributes = new HashSet<string>();
+
             var objs = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_business"))
                 .Select(x => JsonConvert.DeserializeObject(x))
                 .Select(x => {
@@ -75,13 +78,12 @@ namespace YelpDataLoader
                             obj.review_count,
                             obj.open
                         },
-                        categories = new List<string>(),
                         hours = new Dictionary<string, Tuple<string, string>>()
                     };
 
                     foreach (var category in obj.categories)
                     {
-                        record.categories.Add(category.ToString());
+                        categories.Add(DatabaseStringify(category.ToString()));
                     }
 
                     return record;
@@ -93,9 +95,17 @@ namespace YelpDataLoader
 
             try
             {
+                var a = objs.ToList();
+
+                //Create category table
+                string cols = string.Join(",", categories.Select(x => x + " SMALLINT NULL DEFAULT 0"));
+                var createTableScript = string.Concat($"CREATE TABLE business_category ( business_id NVARCHAR(45) NOT NULL, { cols }, PRIMARY KEY(business_id));");
+
+                Console.WriteLine(createTableScript);
+
                 //TODO: Implement SQL insertion logic
 
-                var a = objs.ToList();
+                
 
                 transaction.Commit();
             }
@@ -114,6 +124,30 @@ namespace YelpDataLoader
             }
 
             Console.WriteLine("Completed loading business data...");
+        }
+
+        private static string DatabaseStringify(string str)
+        {
+            string result;
+
+            if (str.Contains(")"))
+            {
+                result = str.Replace("(", "_")
+                    .Replace(")", "")
+                    .Replace(" ", "");
+            }
+            else if (str.Contains("&"))
+            {
+                result = str.Replace("&", "_and_")
+                    .Replace(" ", "");
+            }
+            else
+            {
+                result = str.ToLower()
+                    .Replace(" ", "_");
+            }
+
+            return result;
         }
     }
 }

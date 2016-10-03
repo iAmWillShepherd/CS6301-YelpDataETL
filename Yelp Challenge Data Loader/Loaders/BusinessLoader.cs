@@ -79,7 +79,10 @@ namespace YelpDataLoader
                         hours = new Dictionary<string, Tuple<string, string>>()
                     };
 
-                    //TODO: Map categories, hours, and attributes
+                    foreach (var category in obj.categories)
+                    {
+                        record.categories.Add(category.ToString());
+                    }
 
                     return record;
                 });
@@ -91,6 +94,8 @@ namespace YelpDataLoader
             try
             {
                 //TODO: Implement SQL insertion logic
+
+                var a = objs.ToList();
 
                 transaction.Commit();
             }

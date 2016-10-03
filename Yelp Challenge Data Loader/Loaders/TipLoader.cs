@@ -54,7 +54,7 @@ namespace YelpDataLoader
                 connection.Dispose();
             }
 
-            Console.WriteLine("Completed loading tip data.");
+            Console.WriteLine("Completed loading tip data...");
         }
     }
 }

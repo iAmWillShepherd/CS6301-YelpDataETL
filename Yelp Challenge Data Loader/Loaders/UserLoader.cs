@@ -229,7 +229,7 @@ namespace YelpDataLoader
                 connection.Dispose();
             }
 
-            Console.WriteLine("Completed loading user data.");
+            Console.WriteLine("Completed loading user data...");
         }
     }
 }

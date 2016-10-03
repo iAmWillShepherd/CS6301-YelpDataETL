@@ -147,7 +147,7 @@ namespace YelpDataLoader
                 connection.Dispose();
             }
 
-            Console.WriteLine("Completed loading checkin data.");
+            Console.WriteLine("Completed loading checkin data...");
         }
     }
 }

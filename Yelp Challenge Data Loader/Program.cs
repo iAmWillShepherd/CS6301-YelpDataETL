@@ -11,8 +11,6 @@ namespace YelpDataLoader
 
         public static void Main(string[] args)
         {
-            BusinessLoader.Load(connection);
-
             var loaders = new List<Task> {
                 Task.Run(() => BusinessLoader.Load(connection)),
                 Task.Run(() => CheckinLoader.Load(connection)),
@@ -23,7 +21,7 @@ namespace YelpDataLoader
 
             Task.WaitAll(loaders.ToArray());
 
-            Console.WriteLine("Completed loading...");
+            Console.WriteLine("Done.");
         }
     }
 }

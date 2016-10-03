@@ -63,7 +63,7 @@ namespace YelpDataLoader
                 connection.Dispose();
             }
 
-            Console.WriteLine("Completed loading review data.");
+            Console.WriteLine("Completed loading review data...");
         }
     }
 }

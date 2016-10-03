@@ -113,7 +113,7 @@ namespace YelpDataLoader
                 connection.Dispose();
             }
 
-            Console.WriteLine("Completed loading business data.");
+            Console.WriteLine("Completed loading business data...");
         }
     }
 }

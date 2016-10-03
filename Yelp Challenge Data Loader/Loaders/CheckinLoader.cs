@@ -12,7 +12,7 @@ namespace YelpDataLoader
         private static string _sql =
             @"INSERT INTO yelp.checkin (
             business_id,
-            day_of_week_id,
+            day_of_week,
             hour_0,
             hour_1,
             hour_2,

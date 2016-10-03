@@ -1,3 +1,4 @@
+using System;
 using System.Data;
 using System.Linq;
 using System.IO;
@@ -52,6 +53,8 @@ namespace YelpDataLoader
                 connection.Close();
                 connection.Dispose();
             }
+
+            Console.WriteLine("Completed loading tip data.");
         }
     }
 }

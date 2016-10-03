@@ -228,6 +228,8 @@ namespace YelpDataLoader
                 connection.Close();
                 connection.Dispose();
             }
+
+            Console.WriteLine("Completed loading user data.");
         }
     }
 }

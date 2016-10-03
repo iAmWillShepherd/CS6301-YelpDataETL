@@ -112,6 +112,8 @@ namespace YelpDataLoader
                 connection.Close();
                 connection.Dispose();
             }
+
+            Console.WriteLine("Completed loading business data.");
         }
     }
 }

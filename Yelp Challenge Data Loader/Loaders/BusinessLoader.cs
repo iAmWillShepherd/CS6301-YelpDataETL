@@ -56,7 +56,7 @@ namespace YelpDataLoader
 
         public static void Load(IDbConnection connection)
         {
-            var objs = File.ReadLines(Helpers.GetFullFilename("business"))
+            var objs = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_business"))
                 .Select(x => JsonConvert.DeserializeObject(x))
                 .Select(x => {
                     dynamic obj = x;

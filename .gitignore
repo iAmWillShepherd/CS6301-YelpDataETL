@@ -1,1 +1,4 @@
-data/
+[Oo]bj/
+[Bb]in/
+.vscode/
+*.json

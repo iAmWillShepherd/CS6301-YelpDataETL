@@ -25,7 +25,6 @@ DROP TABLE IF EXISTS `checkin`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `checkin` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `business_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `day_of_week` int(11) NOT NULL COMMENT '0: Sunday\n1: Monday\n2: Tuesday\n3: Wednesday\n4: Thursday\n5: Friday\n6: Saturday',
   `hour_0` int(11) DEFAULT '0',
@@ -52,9 +51,8 @@ CREATE TABLE `checkin` (
   `hour_21` int(11) DEFAULT '0',
   `hour_22` int(11) DEFAULT '0',
   `hour_23` int(11) DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `Idx` (`business_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -65,7 +63,6 @@ DROP TABLE IF EXISTS `review`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `review` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `business_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `user_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `stars` decimal(2,1) NOT NULL,
@@ -74,9 +71,8 @@ CREATE TABLE `review` (
   `votes_funny` int(11) DEFAULT '0',
   `votes_useful` int(11) DEFAULT '0',
   `votes_cool` int(11) DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `FOREIGN` (`business_id`,`user_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`business_id`, `user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -87,15 +83,13 @@ DROP TABLE IF EXISTS `tip`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tip` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `text` text NOT NULL,
   `business_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `user_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `date` date NOT NULL,
   `likes` int(11) DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `Idx` (`business_id`,`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`business_id`, `user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -106,16 +100,14 @@ DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `name` varchar(45) CHARACTER SET utf8 NOT NULL,
   `review_count` int(11) NOT NULL,
   `average_stars` decimal(3,2) NOT NULL,
   `yelping_since` date NOT NULL,
   `fans` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `Idx` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -126,7 +118,6 @@ DROP TABLE IF EXISTS `user_compliment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user_compliment` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` varchar(45) NOT NULL,
   `profile` int(11) NOT NULL,
   `cute` int(11) NOT NULL,
@@ -139,9 +130,8 @@ CREATE TABLE `user_compliment` (
   `hot` int(11) NOT NULL,
   `cool` int(11) NOT NULL,
   `more` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `Idx` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -152,12 +142,10 @@ DROP TABLE IF EXISTS `user_elite_status`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user_elite_status` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` varchar(45) NOT NULL,
   `year` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `Idx` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -168,12 +156,10 @@ DROP TABLE IF EXISTS `user_friend`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user_friend` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` varchar(45) NOT NULL,
   `friend_user_id` varchar(45) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `Idx` (`user_id`,`friend_user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`user_id`, `friend_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -184,14 +170,12 @@ DROP TABLE IF EXISTS `user_vote`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user_vote` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` varchar(45) NOT NULL,
   `funny` int(11) DEFAULT '0',
   `useful` int(11) DEFAULT '0',
   `cool` int(11) DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `Idx` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

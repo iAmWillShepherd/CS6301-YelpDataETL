@@ -101,7 +101,7 @@ namespace YelpDataLoader
                 string cols = string.Join(",", categories.Select(x => x + " SMALLINT NULL DEFAULT 0"));
                 var createTableScript = string.Concat($"CREATE TABLE business_category ( business_id NVARCHAR(45) NOT NULL, { cols }, PRIMARY KEY(business_id));");
 
-                Console.WriteLine(createTableScript);
+                //Console.WriteLine(createTableScript);
 
                 //TODO: Implement SQL insertion logic
 
@@ -128,7 +128,7 @@ namespace YelpDataLoader
 
         private static string DatabaseStringify(string str)
         {
-            string result;
+            string result = str;
 
             if (str.Contains(")"))
             {
@@ -136,12 +136,14 @@ namespace YelpDataLoader
                     .Replace(")", "")
                     .Replace(" ", "");
             }
-            else if (str.Contains("&"))
+
+            if (str.Contains("&"))
             {
                 result = str.Replace("&", "_and_")
                     .Replace(" ", "");
             }
-            else
+            
+            if (str.Contains(" "))
             {
                 result = str.ToLower()
                     .Replace(" ", "_");

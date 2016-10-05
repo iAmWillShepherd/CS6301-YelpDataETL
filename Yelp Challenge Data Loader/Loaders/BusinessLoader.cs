@@ -101,11 +101,12 @@ namespace YelpDataLoader
                 string cols = string.Join(",", categories.Select(x => x + " SMALLINT NULL DEFAULT 0"));
                 var createTableScript = string.Concat($"CREATE TABLE business_category ( business_id NVARCHAR(45) NOT NULL, { cols }, PRIMARY KEY(business_id));");
 
+                using(var fs = File.CreateText("test_script.sql"))
+                {
+                    fs.Write(createTableScript);
+                }
                 //Console.WriteLine(createTableScript);
-
                 //TODO: Implement SQL insertion logic
-
-                
 
                 transaction.Commit();
             }
@@ -128,24 +129,42 @@ namespace YelpDataLoader
 
         private static string DatabaseStringify(string str)
         {
-            string result = str;
+            string result = str.ToLower().Trim();
 
-            if (str.Contains(")"))
+            if (result.Contains("("))
             {
-                result = str.Replace("(", "_")
-                    .Replace(")", "")
-                    .Replace(" ", "");
+                result = result.Replace("(", " ")
+                    .Replace(")", "");
             }
 
-            if (str.Contains("&"))
+            if (result.Contains("&"))
             {
-                result = str.Replace("&", "_and_")
-                    .Replace(" ", "");
+                result = result.Replace("&", "and");
+            }
+
+            if (result.Contains("'"))
+            {
+                result = result.Replace("'", "");
+            }
+
+            if (result.Contains("/"))
+            {
+                result = result.Replace("/", "");
+            }
+
+            if (result.Contains("-"))
+            {
+                result = result.Replace("-", "");
+            }
+
+            if (result.Contains(","))
+            {
+                result = result.Replace(",", "");
             }
             
-            if (str.Contains(" "))
+            if (result.Contains(" "))
             {
-                result = str.ToLower()
+                result = result.ToLower()
                     .Replace(" ", "_");
             }
 

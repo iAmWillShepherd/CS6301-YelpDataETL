@@ -100,12 +100,8 @@ namespace YelpDataLoader
                 //Create category table
                 string cols = string.Join(",", categories.Select(x => x + " SMALLINT NULL DEFAULT 0"));
                 var createTableScript = string.Concat($"CREATE TABLE business_category ( business_id NVARCHAR(45) NOT NULL, { cols }, PRIMARY KEY(business_id));");
-
-                Console.WriteLine(createTableScript);
-
-                //TODO: Implement SQL insertion logic
-
                 
+                //TODO: Implement SQL insertion logic
 
                 transaction.Commit();
             }

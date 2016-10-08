@@ -13,10 +13,10 @@ namespace YelpDataLoader
         {
             var loaders = new List<Task> {
                 Task.Run(() => BusinessLoader.Load(connection)),
-                Task.Run(() => CheckinLoader.Load(connection)),
-                Task.Run(() => ReviewLoader.Load(connection)),
-                Task.Run(() => TipLoader.Load(connection)),
-                Task.Run(() => UserLoader.Load(connection))
+                // Task.Run(() => CheckinLoader.Load(connection)),
+                // Task.Run(() => ReviewLoader.Load(connection)),
+                // Task.Run(() => TipLoader.Load(connection)),
+                // Task.Run(() => UserLoader.Load(connection))
             };
 
             Task.WaitAll(loaders.ToArray());

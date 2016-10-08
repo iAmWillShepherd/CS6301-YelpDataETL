@@ -6,13 +6,12 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
 using Dapper;
-using MySql.Data.MySqlClient;
 
 namespace YelpDataLoader
 {
     public class BusinessLoader
     {
-        private string businessSql =
+        private static string InsertBusinessSql =>
             @"INSERT INTO business (
                 business_id,
                 name,
@@ -36,7 +35,7 @@ namespace YelpDataLoader
                 @review_count,
                 @open);";
 
-        private string categorySqlFormat =
+        private static string InsertCategorySqlFormat =>
             @"INSERT INTO business_category_{0} (
                 business_id,
                 {1})
@@ -44,7 +43,7 @@ namespace YelpDataLoader
                 @business_id,
                 {2});";
 
-        private string attributeSqlFormat =
+        private static string InsertAttributeSqlFormat =>
             @"INSERT INTO business_attribute_{0} (
                 business_id,
                 {1})
@@ -52,7 +51,7 @@ namespace YelpDataLoader
                 @business_id,
                 {2});";
 
-        private string hours =
+        private static string InsertHoursSql =>
             @"INSERT INTO hours (
                 business_id,
                 day,
@@ -69,7 +68,7 @@ namespace YelpDataLoader
             var categories = new HashSet<string>();
             var attributes = new HashSet<string>();
 
-            var objs = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_business"))
+            var records = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_business"))
                 .Select(x => JsonConvert.DeserializeObject(x))
                 .Select(x => {
                     dynamic obj = x;
@@ -107,29 +106,30 @@ namespace YelpDataLoader
 
             try
             {   
-                foreach (var x in objs.SelectMany(x => x.businessCategories))
+                foreach (var x in records.SelectMany(x => x.businessCategories))
                 {
                     categories.Add(x);
                 }
 
-                foreach (var x in objs.SelectMany(x => x.businessAttributes))
+                foreach (var x in records.SelectMany(x => x.businessAttributes))
                 {
 
                 }
 
                 foreach (var script in BuildAtrributeTables(attributes)
-                    .Union(BuildCategoryTables(categories)
-                    .Where(x => !string.IsNullOrEmpty(x))))
+                    .Union(BuildCategoryTables(categories)))
                 {
                     connection.Execute(script);
                 }
 
-                //TODO: Implement SQL insertion logic
-                foreach (var obj in objs)
+                foreach (var obj in records)
                 {
+                    //Insert categories
                     foreach (var insertScript in BuildCategoryInsertSql(obj.businessCategories))
                     {
-                        connection.Execute(insertScript, transaction);
+                        connection.Execute(insertScript, new {
+                            business_id = obj.business.business_id
+                        }, transaction); 
                     }
                 }
 
@@ -154,7 +154,9 @@ namespace YelpDataLoader
 
         private static string DatabaseStringify(string str)
         {
-            var result = str.ToLower()
+            var result = str
+                .Trim()
+                .ToLower()
                 .Replace("(", " ")
                 .Replace("-", " ")
                 .Replace(")", "")
@@ -190,14 +192,21 @@ namespace YelpDataLoader
             return attributeTables;
         }
 
-        private static List<string> BuildCategoryInsertSql(List<string> categories)
+        private static List<string> BuildCategoryInsertSql(IEnumerable<string> categories)
         {
             var partitionedCategories = Partition(categories);
             var categoryInserts = new List<string>();
 
             for (int i = 0; i < partitionedCategories.Count; i++)
             {
-                
+                if (partitionedCategories[i].Count > 0)
+                {
+                    var colsToInsert = string.Join(", ", partitionedCategories[i].Select(x => DatabaseStringify(x)));
+                    var valsToInsert = string.Join(", ", Enumerable.Repeat(true, partitionedCategories[i].Count));
+                    var sql = string.Format(InsertCategorySqlFormat, i + 1, colsToInsert, valsToInsert);
+
+                    categoryInserts.Add(sql);
+                }
             }
 
             return categoryInserts;

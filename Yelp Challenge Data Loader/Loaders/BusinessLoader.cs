@@ -36,13 +36,21 @@ namespace YelpDataLoader
                 @review_count,
                 @open);";
 
-        private string categorySql =
-            @"INSERT INTO category (
+        private string categorySqlFormat =
+            @"INSERT INTO business_category_{0} (
                 business_id,
-                category)
+                {1})
             VALUES (
                 @business_id,
-                @category);";
+                {2});";
+
+        private string attributeSqlFormat =
+            @"INSERT INTO business_attribute_{0} (
+                business_id,
+                {1})
+            VALUES (
+                @business_id,
+                {2});";
 
         private string hours =
             @"INSERT INTO hours (
@@ -54,9 +62,7 @@ namespace YelpDataLoader
                 @business_id,
                 @day,
                 @close,
-                @open);";
-
-        
+                @open);";    
 
         public static void Load(IDbConnection connection)
         {
@@ -82,60 +88,50 @@ namespace YelpDataLoader
                             obj.review_count,
                             obj.open
                         },
+                        businessCategories = new List<string>(),
+                        businessAttributes = new List<KeyValuePair<string, string>>(),
                         hours = new Dictionary<string, Tuple<string, string>>()
                     };
 
                     foreach (var category in obj.categories)
                     {
-                        categories.Add(category.ToString());
+                        record.businessCategories.Add(category.ToString());
                     }
 
                     return record;
-                }).ToList();
+                });
 
             connection.Open();
-            //objs.Take(10).ToList();
 
-            try
-            {
-                //Create category table
-                var partitionedCategories = new Dictionary<int, List<string>>();
-
-                for (var i = 0; i < 10; i++)
-                {
-                    partitionedCategories.Add(i, new List<string>());
-                }
-
-                foreach (var category in categories)
-                {
-                    var idx = FNV1Hash.Create(Encoding.ASCII.GetBytes(category)) % (ulong)partitionedCategories.Count;
-
-                    partitionedCategories[(int)idx].Add(category); 
-                }
-
-                var categoryTables = new List<string>();
-
-                for (var i = 0; i < partitionedCategories.Count; i++)
-                {
-                    var columns = string.Join(", ", 
-                        partitionedCategories[i].Select(x => DatabaseStringify(x) + $" SMALLINT NULL DEFAULT 0"));
-
-                    var createSql = $"DROP TABLE IF EXISTS business_category_{i + 1}; CREATE TABLE business_category_{i + 1} ( business_id NVARCHAR(45) NOT NULL, { columns }, PRIMARY KEY(business_id));";
-                    
-                    connection.Execute(createSql);
-                }
-            }
-            catch (MySqlException ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-            }
-            
             var transaction = connection.BeginTransaction();
 
             try
             {   
+                foreach (var x in objs.SelectMany(x => x.businessCategories))
+                {
+                    categories.Add(x);
+                }
+
+                foreach (var x in objs.SelectMany(x => x.businessAttributes))
+                {
+
+                }
+
+                foreach (var script in BuildAtrributeTables(attributes)
+                    .Union(BuildCategoryTables(categories)
+                    .Where(x => !string.IsNullOrEmpty(x))))
+                {
+                    connection.Execute(script);
+                }
+
                 //TODO: Implement SQL insertion logic
+                foreach (var obj in objs)
+                {
+                    foreach (var insertScript in BuildCategoryInsertSql(obj.businessCategories))
+                    {
+                        connection.Execute(insertScript, transaction);
+                    }
+                }
 
                 transaction.Commit();
             }
@@ -169,6 +165,61 @@ namespace YelpDataLoader
                 .Replace(" ", "_");
                
             return result;
+        }
+
+        private static List<string> BuildCategoryTables(IEnumerable<string> categories)
+        {
+            var partitionedCategories = Partition(categories);
+            var categoryTables = new List<string>();
+
+            for (var i = 0; i < partitionedCategories.Count; i++)
+            {
+                var columns = string.Join(", ", 
+                    partitionedCategories[i].Select(x => DatabaseStringify(x) + $" SMALLINT NULL DEFAULT 0"));
+
+                categoryTables.Add($"DROP TABLE IF EXISTS business_category_{i + 1}; CREATE TABLE business_category_{i + 1} ( business_id NVARCHAR(45) NOT NULL, { columns }, PRIMARY KEY(business_id));");
+            }
+
+            return categoryTables;
+        }
+
+        private static List<string> BuildAtrributeTables(IEnumerable<string> attributes)
+        {
+            var attributeTables = new List<string>();
+
+            return attributeTables;
+        }
+
+        private static List<string> BuildCategoryInsertSql(List<string> categories)
+        {
+            var partitionedCategories = Partition(categories);
+            var categoryInserts = new List<string>();
+
+            for (int i = 0; i < partitionedCategories.Count; i++)
+            {
+                
+            }
+
+            return categoryInserts;
+        }
+
+        private static Dictionary<int, List<string>> Partition(IEnumerable<string> xs, int numberOfPartitions = 10)
+        {
+            var partitions = new Dictionary<int, List<string>>();
+
+            for (var i = 0; i < numberOfPartitions; i++)
+            {
+                partitions.Add(i, new List<string>());
+            }
+
+            foreach (var x in xs)
+            {
+                var idx = FNV1Hash.Create(Encoding.ASCII.GetBytes(x)) % (ulong)partitions.Count;
+
+                partitions[(int)idx].Add(x); 
+            }
+
+            return partitions;
         }
     }
 }

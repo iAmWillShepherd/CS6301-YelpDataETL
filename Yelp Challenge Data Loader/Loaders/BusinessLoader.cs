@@ -115,23 +115,14 @@ namespace YelpDataLoader
 
                 var categoryTables = new List<string>();
 
-                using (var f = File.CreateText("generated_categories.sql"))
+                for (var i = 0; i < partitionedCategories.Count; i++)
                 {
-                    for (var i = 0; i < partitionedCategories.Count; i++)
-                    {
-                        var columns = string.Join(", ", 
-                            partitionedCategories[i].Select(x => DatabaseStringify(x) + $" SMALLINT NULL DEFAULT 0"));
+                    var columns = string.Join(", ", 
+                        partitionedCategories[i].Select(x => DatabaseStringify(x) + $" SMALLINT NULL DEFAULT 0"));
 
-                        var createSql = $"DROP TABLE IF EXISTS business_category_{i + 1}; CREATE TABLE business_category_{i + 1} ( business_id NVARCHAR(45) NOT NULL, { columns }, PRIMARY KEY(business_id));";
-                        
-                        f.WriteLine(createSql);
-                        categoryTables.Add(createSql);
-                    }
-                }
-
-                foreach (var script in categoryTables)
-                {
-                    connection.Execute(script);
+                    var createSql = $"DROP TABLE IF EXISTS business_category_{i + 1}; CREATE TABLE business_category_{i + 1} ( business_id NVARCHAR(45) NOT NULL, { columns }, PRIMARY KEY(business_id));";
+                    
+                    connection.Execute(createSql);
                 }
             }
             catch (MySqlException ex)

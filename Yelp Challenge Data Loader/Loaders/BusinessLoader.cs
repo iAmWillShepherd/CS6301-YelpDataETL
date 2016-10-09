@@ -9,6 +9,55 @@ using Dapper;
 
 namespace YelpDataLoader
 {
+    public class AttributeInfo
+    {
+        public string Path { get; set; }
+
+        public string Key { get; set; }
+
+        public string Value { get; set; }
+
+        public override bool Equals (object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+            
+            return (Key == ((AttributeInfo)obj).Key);
+        }
+        
+        // override object.GetHashCode
+        public override int GetHashCode()
+        {
+           return Key.GetHashCode() ^ Path.GetHashCode();
+        }
+    }
+
+    public class Business
+    {
+        public string BusinessId { get; set; }
+        public string Name { get; set; }
+        public string FullAddress { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public float Latitude { get; set; }
+        public float Longitude { get; set; }
+        public float Stars { get; set; }
+        public int ReviewCount { get; set; }
+        public bool Open { get; set; }
+        public List<string> Categories { get; set; }
+        public List<AttributeInfo> Attributes { get; set; }
+        public Dictionary<string, KeyValuePair<string, string>> Hours { get; set; }
+
+        public Business()
+        {
+            Categories = new List<string>();
+            Attributes = new List<AttributeInfo>();
+            Hours = new Dictionary<string, KeyValuePair<string, string>>();
+        }
+    }
+
     public class BusinessLoader
     {
         private static string InsertBusinessSql =>
@@ -66,7 +115,7 @@ namespace YelpDataLoader
         public static void Load(IDbConnection connection)
         {
             var categories = new HashSet<string>();
-            var attributes = new HashSet<string>();
+            var attributes = new HashSet<AttributeInfo>();
 
             var records = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_business"))
                 .Select(x => JsonConvert.DeserializeObject(x))
@@ -74,27 +123,43 @@ namespace YelpDataLoader
                     dynamic obj = x;
 
                     //Build deserialized object
-                    var record = new {
-                        business = new {
-                            obj.business_id,
-                            obj.name,
-                            obj.full_address,
-                            obj.city,
-                            obj.state,
-                            obj.latitude,
-                            obj.longitude,
-                            obj.stars,
-                            obj.review_count,
-                            obj.open
-                        },
-                        businessCategories = new List<string>(),
-                        businessAttributes = new List<KeyValuePair<string, string>>(),
-                        hours = new Dictionary<string, Tuple<string, string>>()
+                    var record = new Business {
+                        BusinessId = obj.business_id,
+                        Name = obj.name,
+                        FullAddress = obj.full_address,
+                        City = obj.city,
+                        State = obj.state,
+                        Latitude = obj.latitude,
+                        Longitude = obj.longitude,
+                        Stars = obj.stars,
+                        ReviewCount = obj.review_count,
+                        Open = obj.open
                     };
 
                     foreach (var category in obj.categories)
                     {
-                        record.businessCategories.Add(category.ToString());
+                        record.Categories.Add(category.ToString());
+                    }
+
+                    foreach (var attribute in obj.attributes)
+                    {
+                        record.Attributes.Add(new AttributeInfo {
+                            Path = attribute.Path,
+                            Key = attribute.Name,
+                            Value = attribute.Value.ToString()
+                        });
+
+                        if (attribute.Type == Newtonsoft.Json.Linq.JTokenType.Object)
+                        {
+                            foreach (var child in attribute.ChildrenTokens)
+                            {
+                                record.Attributes.Add(new AttributeInfo {
+                                    Path = child.Path,
+                                    Key = child.Key,
+                                    Value = child.Value.ToString()
+                                });
+                            }
+                        }
                     }
 
                     return record;
@@ -106,14 +171,14 @@ namespace YelpDataLoader
 
             try
             {   
-                foreach (var x in records.SelectMany(x => x.businessCategories))
+                foreach (var category in records.SelectMany(x => x.Categories))
                 {
-                    categories.Add(x);
+                    categories.Add(category);
                 }
 
-                foreach (var x in records.SelectMany(x => x.businessAttributes))
+                foreach (var attributeInfo in records.SelectMany(x => x.Attributes))
                 {
-
+                    attributes.Add(attributeInfo);
                 }
 
                 foreach (var script in BuildAtrributeTables(attributes)
@@ -122,13 +187,13 @@ namespace YelpDataLoader
                     connection.Execute(script);
                 }
 
-                foreach (var obj in records)
+                foreach (var record in records)
                 {
                     //Insert categories
-                    foreach (var insertScript in BuildCategoryInsertSql(obj.businessCategories))
+                    foreach (var insertScript in BuildCategoryInsertSql(record.Categories))
                     {
                         connection.Execute(insertScript, new {
-                            business_id = obj.business.business_id
+                            business_id = record.BusinessId
                         }, transaction); 
                     }
                 }
@@ -185,9 +250,18 @@ namespace YelpDataLoader
             return categoryTables;
         }
 
-        private static List<string> BuildAtrributeTables(IEnumerable<string> attributes)
+        private static List<string> BuildAtrributeTables(HashSet<AttributeInfo> attributes)
         {
+            var groupedAttributes = attributes.GroupBy(x => x.Key.ToLower());
+
+            //var partitionedAttributes = Partition(attributes);
             var attributeTables = new List<string>();
+
+            // for (var i = 0; i < partitionedAttributes.Count; i++)
+            // {
+            //     // var columns = string.Join(", ",
+            //     //     partitionedAttributes[i].Select(x => ""));
+            // }
 
             return attributeTables;
         }

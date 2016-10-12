@@ -140,11 +140,13 @@ namespace YelpDataLoader
 
                     foreach (var attribute in x["attributes"].Children())
                     {
+                        var val = ((JProperty)attribute).Value.ToString();
+
                         record.Attributes.Add(new AttributeInfo {
                             Path = attribute.Path,
                             Key = ((JProperty)attribute).Name.ToLower(),
-                            Value = ((JProperty)attribute).Value.ToString(),
-                            ValueType = GetType(((JProperty)attribute).Value.ToString())
+                            Value = val,
+                            ValueType = attribute.Path.Contains("[") ? typeof(object) : GetType(val)
                         });
                     }
 
@@ -213,9 +215,6 @@ namespace YelpDataLoader
 
             if (bool.TryParse(obj, out dummyBool))
                 return typeof(bool);
-
-            if (obj.Contains("{"))
-                return typeof(object);  //This is just a rule of thumb
 
             return typeof(string);
         }

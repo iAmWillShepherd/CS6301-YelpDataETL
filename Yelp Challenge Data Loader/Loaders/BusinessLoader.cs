@@ -214,6 +214,9 @@ namespace YelpDataLoader
             if (bool.TryParse(obj, out dummyBool))
                 return typeof(bool);
 
+            if (obj.Contains("{"))
+                return typeof(object);  //This is just a rule of thumb
+
             return typeof(string);
         }
 

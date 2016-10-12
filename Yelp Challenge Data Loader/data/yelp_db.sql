@@ -56,6 +56,28 @@ CREATE TABLE `checkin` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `new_table`
+--
+
+DROP TABLE IF EXISTS `business`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `new_table` (
+  `business_id` varchar(45) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `full_address` varchar(100) NOT NULL,
+  `city` varchar(45) NOT NULL,
+  `state` varchar(5) NOT NULL,
+  `longitude` float NOT NULL,
+  `latitude` float NOT NULL,
+  `stars` float DEFAULT '0',
+  `review_count` int(11) DEFAULT '0',
+  `open` tinyint(4) DEFAULT '0',
+  PRIMARY KEY (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `review`
 --
 
@@ -71,7 +93,7 @@ CREATE TABLE `review` (
   `votes_funny` int(11) DEFAULT '0',
   `votes_useful` int(11) DEFAULT '0',
   `votes_cool` int(11) DEFAULT '0',
-  PRIMARY KEY (`business_id`, `user_id`)
+  PRIMARY KEY (`business_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -88,7 +110,7 @@ CREATE TABLE `tip` (
   `user_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `date` date NOT NULL,
   `likes` int(11) DEFAULT '0',
-  PRIMARY KEY (`business_id`, `user_id`)
+  PRIMARY KEY (`business_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -158,7 +180,7 @@ DROP TABLE IF EXISTS `user_friend`;
 CREATE TABLE `user_friend` (
   `user_id` varchar(45) NOT NULL,
   `friend_user_id` varchar(45) NOT NULL,
-  PRIMARY KEY (`user_id`, `friend_user_id`)
+  PRIMARY KEY (`user_id`,`friend_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -187,4 +209,4 @@ CREATE TABLE `user_vote` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-09-29 15:26:50
+-- Dump completed on 2016-10-12 18:07:51

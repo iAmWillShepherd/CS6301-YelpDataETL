@@ -1,6 +1,6 @@
 using System;
 
-namespace YelpDataLoader
+namespace YelpDataETL
 {
     public class BusinessAttributeInfo
     {

@@ -5,7 +5,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Dapper;
 
-namespace YelpDataLoader
+namespace YelpDataETL.Loaders
 {
     public class ReviewLoader
     {

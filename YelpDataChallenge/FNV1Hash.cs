@@ -1,4 +1,4 @@
-namespace YelpDataLoader
+namespace YelpDataETL
 {
     public static class Fnv1Hash
     {

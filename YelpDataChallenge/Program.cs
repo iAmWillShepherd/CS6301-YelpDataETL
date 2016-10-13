@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
+using YelpDataETL.Loaders;
 
-namespace YelpDataLoader
+namespace YelpDataETL
 {
     public class Program
     {

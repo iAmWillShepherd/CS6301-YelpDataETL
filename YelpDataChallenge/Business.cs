@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace YelpDataLoader
+namespace YelpDataETL
 {
     public class Business
     {

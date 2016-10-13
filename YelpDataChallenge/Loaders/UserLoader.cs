@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Dapper;
 
-namespace YelpDataLoader
+namespace YelpDataETL.Loaders
 {
     public class UserLoader
     {

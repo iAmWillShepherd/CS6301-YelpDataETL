@@ -8,7 +8,7 @@ using System.Text;
 using Dapper;
 using Newtonsoft.Json.Linq;
 
-namespace YelpDataLoader
+namespace YelpDataETL.Loaders
 {
     public class BusinessLoader
     {

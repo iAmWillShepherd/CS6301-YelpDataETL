@@ -146,7 +146,7 @@ namespace YelpDataLoader
                             Path = attribute.Path,
                             Key = ((JProperty)attribute).Name.ToLower(),
                             Value = val,
-                            ValueType = attribute.Path.Contains("[") ? typeof(object) : GetType(val)
+                            ValueType = GetType(val)
                         });
                     }
 
@@ -216,6 +216,9 @@ namespace YelpDataLoader
             if (bool.TryParse(obj, out dummyBool))
                 return typeof(bool);
 
+            if (obj.Contains("{") && obj.Contains("}"))
+                return typeof(object);
+
             return typeof(string);
         }
 
@@ -254,7 +257,9 @@ namespace YelpDataLoader
 
         private static List<string> BuildAtrributeTables(IEnumerable<AttributeInfo> attributes)
         {
-            var groupedAttributes = attributes.GroupBy(x => x.Key.ToLower());
+            var objs = attributes.Where(attr => attr.ValueType == typeof(object)).ToList();
+            
+            var groupedAttributes = attributes.GroupBy(x => x.Key);
 
             //var partitionedAttributes = Partition(attributes);
             var attributeTables = new List<string>();

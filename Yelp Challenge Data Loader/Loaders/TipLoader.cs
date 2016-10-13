@@ -27,13 +27,12 @@ namespace YelpDataLoader
         {
             var objs = File
                 .ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_tip"))
-                .Select(x => JsonConvert.DeserializeObject(x))
+                .Select(JsonConvert.DeserializeObject)
                 .Select(x =>
                 {
                     dynamic obj = x;
 
-                    return new
-                    {
+                    return new {
                         obj.text,
                         obj.business_id,
                         obj.user_id,

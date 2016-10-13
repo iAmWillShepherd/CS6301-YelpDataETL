@@ -1,19 +1,19 @@
 namespace YelpDataLoader
 {
-    public static class FNV1Hash
+    public static class Fnv1Hash
     {
-        private const ulong FNV_OFFSET_BASIS = unchecked(14695981039346656037);
+        private const ulong FNV_OFFSET_BASIS = 14695981039346656037;
 
-        private const ulong FNV_PRIME = unchecked(1099511628211);
+        private const ulong FNV_PRIME = 1099511628211;
 
         public static ulong Create(byte[] bytes)
         {
-            var hash = FNV_OFFSET_BASIS;
+            ulong hash = FNV_OFFSET_BASIS;
 
-            foreach(var b in bytes)
+            foreach (byte b in bytes)
             {
                 hash *= FNV_PRIME;
-                hash = hash^b;
+                hash = hash ^ b;
             }
 
             return hash;

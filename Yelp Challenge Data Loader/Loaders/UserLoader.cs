@@ -85,13 +85,12 @@ namespace YelpDataLoader
         public static void Load(IDbConnection connection)
         {
             var objs = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_user"))
-                .Select(x => JsonConvert.DeserializeObject(x))
+                .Select(JsonConvert.DeserializeObject)
                 .Select(x =>
                 {
                     dynamic obj = x;
 
-                    var user = new
-                    {
+                    var user = new {
                         obj.user_id,
                         name = obj.name,
                         obj.review_count,
@@ -115,17 +114,12 @@ namespace YelpDataLoader
                             { "cool", 0},
                             { "more", 0},
                     };
+                
                     var votes = new Dictionary<string, int>();
 
-                    foreach (var year in obj.elite)
-                    {
-                        elite.Add((int)year);
-                    }
+                    foreach (var year in obj.elite) elite.Add((int) year);
 
-                    foreach (var friend in obj.friends)
-                    {
-                        friends.Add((string)friend.Value);
-                    }
+                    foreach (var friend in obj.friends) friends.Add((string) friend.Value);
 
                     foreach (var kvp in obj.compliments)
                     {
@@ -133,13 +127,9 @@ namespace YelpDataLoader
                             compliments[kvp.Name] = (int)kvp.Value.Value;
                     }
 
-                    foreach (var kvp in obj.votes)
-                    {
-                        votes.Add(kvp.Name, (int)kvp.Value.Value);
-                    }
+                    foreach (var kvp in obj.votes) votes.Add(kvp.Name, (int) kvp.Value.Value);
 
-                    return new
-                    {
+                    return new {
                         user,
                         yearsElite = elite,
                         friends,
@@ -149,6 +139,7 @@ namespace YelpDataLoader
                 });
 
             connection.Open();
+
             var transaction = connection.BeginTransaction();
 
             try
@@ -156,16 +147,13 @@ namespace YelpDataLoader
                 foreach (var obj in objs)
                 {
                     if (((string)obj.user.name).Contains("\xE9"))
-                    {
                         break;
-                    }
 
                     connection.Execute(_userSql, obj.user);
 
                     connection.Execute(
                         _userComplimentsSql,
-                        new
-                        {
+                        new {
                             obj.user.user_id,
                             profile = obj.compliments["profile"],
                             cute = obj.compliments["cute"],
@@ -190,7 +178,7 @@ namespace YelpDataLoader
                             cool = obj.votes["cool"]
                         }, transaction);
 
-                    foreach (var year in obj.yearsElite)
+                    foreach (int year in obj.yearsElite)
                     {
                         connection.Execute(
                             _eliteStatusSql,
@@ -201,7 +189,7 @@ namespace YelpDataLoader
                             }, transaction);
                     }
 
-                    foreach (var friend in obj.friends)
+                    foreach (string friend in obj.friends)
                     {
                         connection.Execute(
                             _userFriendsSql,

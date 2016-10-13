@@ -7,12 +7,13 @@ namespace YelpDataLoader
 {
     public class Program
     {
-        private static MySqlConnection connection => new MySqlConnection("server=localhost;user=root;password=P@ssword!;database=yelp;port=3306;");
+        private static MySqlConnection Connection
+            => new MySqlConnection("server=localhost;user=root;password=P@ssword!;database=yelp;port=3306;");
 
         public static void Main(string[] args)
         {
             var loaders = new List<Task> {
-                Task.Run(() => BusinessLoader.Load(connection)),
+                Task.Run(() => BusinessLoader.Load(Connection))
                 // Task.Run(() => CheckinLoader.Load(connection)),
                 // Task.Run(() => ReviewLoader.Load(connection)),
                 // Task.Run(() => TipLoader.Load(connection)),

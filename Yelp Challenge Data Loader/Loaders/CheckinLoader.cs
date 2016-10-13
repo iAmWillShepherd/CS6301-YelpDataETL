@@ -69,7 +69,7 @@ namespace YelpDataLoader
         public static void Load(IDbConnection connection)
         {
             var objs = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_checkin"))
-                .Select(x => JsonConvert.DeserializeObject(x))
+                .Select(JsonConvert.DeserializeObject)
                 .Select(x =>
                 {
                     dynamic obj = x;
@@ -80,7 +80,7 @@ namespace YelpDataLoader
                         checkinInfo = new Dictionary<int, List<int>>()
                     };
 
-                    for (int i = 0; i < 7; i++)
+                    for (var i = 0; i < 7; i++)
                     {
                         record.checkinInfo.Add(i, new int[24].ToList());
                     }

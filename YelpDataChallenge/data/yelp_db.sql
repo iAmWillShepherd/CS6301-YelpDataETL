@@ -56,13 +56,13 @@ CREATE TABLE `checkin` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `new_table`
+-- Table structure for table `business`
 --
 
 DROP TABLE IF EXISTS `business`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `new_table` (
+CREATE TABLE `business` (
   `business_id` varchar(45) NOT NULL,
   `name` varchar(100) NOT NULL,
   `full_address` varchar(100) NOT NULL,

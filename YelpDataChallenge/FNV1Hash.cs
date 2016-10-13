@@ -18,5 +18,18 @@ namespace YelpDataETL
 
             return hash;
         }
+
+        public static ulong CreateAlternate(byte[] bytes)
+        {
+            ulong hash = FNV_OFFSET_BASIS;
+
+            foreach (byte b in bytes)
+            {                
+                hash = hash ^ b;
+                hash *= FNV_PRIME;
+            }
+
+            return hash;
+        }
     }
 }

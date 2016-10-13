@@ -2,7 +2,6 @@ using System;
 using System.Data;
 using System.Linq;
 using System.IO;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
 using Dapper;
@@ -17,6 +16,8 @@ namespace YelpDataLoader
         public string Key { get; set; }
 
         public string Value { get; set; }
+
+        public Type ValueType { get; set; }
 
         public override bool Equals (object obj)
         {
@@ -46,7 +47,7 @@ namespace YelpDataLoader
         public float Longitude { get; set; }
         public float Stars { get; set; }
         public int ReviewCount { get; set; }
-        public bool Open { get; set; }
+        public bool? Open { get; set; }
         public List<string> Categories { get; set; }
         public List<AttributeInfo> Attributes { get; set; }
         public Dictionary<string, KeyValuePair<string, string>> Hours { get; set; }
@@ -115,52 +116,38 @@ namespace YelpDataLoader
 
         public static void Load(IDbConnection connection)
         {
-            var categories = new HashSet<string>();
-            var attributes = new HashSet<AttributeInfo>();
-
             var records = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_business"))
-                .Select(x => JsonConvert.DeserializeObject(x))
+                .Select(x => JObject.Parse(x))
                 .Select(x => {
-                    dynamic obj = x;
-
                     //Build deserialized object
                     var record = new Business {
-                        BusinessId = obj.business_id,
-                        Name = obj.name,
-                        FullAddress = obj.full_address,
-                        City = obj.city,
-                        State = obj.state,
-                        Latitude = obj.latitude,
-                        Longitude = obj.longitude,
-                        Stars = obj.stars,
-                        ReviewCount = obj.review_count,
-                        Open = obj.open
+                        BusinessId = (string)x["business_id"],
+                        Name = (string)x["name"],
+                        FullAddress = (string)x["full_address"],
+                        City = (string)x["obj.city"],
+                        State = (string)x["state"],
+                        Latitude =  x["latitude"] == null ? default(float) : (float)x["latitude"],
+                        Longitude = x["longitude"] == null? default(float) : (float)x["longitude"],
+                        Stars = x["stars"] == null ? default(float) : (float)x["stars"],
+                        ReviewCount = x["review_count"] == null ? 0 : (int)x["review_count"],
+                        Open = (bool)x["open"]
                     };
 
-                    foreach (var category in obj.categories)
+                    foreach (var category in x["categories"].Children())
                     {
                         record.Categories.Add(category.ToString());
                     }
 
-                    foreach (var attribute in obj.attributes)
+                    foreach (var attribute in x["attributes"].Children())
                     {
+                        var val = ((JProperty)attribute).Value.ToString();
+
                         record.Attributes.Add(new AttributeInfo {
                             Path = attribute.Path,
-                            Key = attribute.Name,
-                            Value = attribute.Value.ToString()
+                            Key = ((JProperty)attribute).Name.ToLower(),
+                            Value = val,
+                            ValueType = GetType(val)
                         });
-
-                        if (attribute.Type == JTokenType.Object)
-                        {
-                            foreach (var child in attribute.ChildrenTokens)
-                            {
-                                record.Attributes.Add(new AttributeInfo {
-                                    Path = child.Path,
-                                    Key = child.Key,
-                                    Value = child.Value.ToString()
-                                });
-                            }
-                        }
                     }
 
                     return record;
@@ -172,18 +159,17 @@ namespace YelpDataLoader
 
             try
             {   
-                foreach (var category in records.SelectMany(x => x.Categories))
-                {
-                    categories.Add(category);
-                }
+                var attributes = records
+                    .SelectMany(x => x.Attributes)
+                    .DistinctBy(y => y.Key);
 
-                foreach (var attributeInfo in records.SelectMany(x => x.Attributes))
-                {
-                    attributes.Add(attributeInfo);
-                }
+                var categories = records
+                    .SelectMany(x => x.Categories)
+                    .Distinct();
 
-                foreach (var script in BuildAtrributeTables(attributes)
-                    .Union(BuildCategoryTables(categories)))
+                var sqlScripts = BuildAtrributeTables(attributes).Union(BuildCategoryTables(categories));
+
+                foreach (var script in sqlScripts)
                 {
                     connection.Execute(script);
                 }
@@ -216,6 +202,24 @@ namespace YelpDataLoader
             }
 
             Console.WriteLine("Completed loading business data...");
+        }
+
+        private static Type GetType(string obj)
+        {
+            int dummyInt;
+
+            if (int.TryParse(obj, out dummyInt))
+                return typeof(int);
+            
+            bool dummyBool;
+
+            if (bool.TryParse(obj, out dummyBool))
+                return typeof(bool);
+
+            if (obj.Contains("{") && obj.Contains("}"))
+                return typeof(object);
+
+            return typeof(string);
         }
 
         private static string DatabaseStringify(string str)
@@ -251,9 +255,11 @@ namespace YelpDataLoader
             return categoryTables;
         }
 
-        private static List<string> BuildAtrributeTables(HashSet<AttributeInfo> attributes)
+        private static List<string> BuildAtrributeTables(IEnumerable<AttributeInfo> attributes)
         {
-            var groupedAttributes = attributes.GroupBy(x => x.Key.ToLower());
+            var objs = attributes.Where(attr => attr.ValueType == typeof(object)).ToList();
+            
+            var groupedAttributes = attributes.GroupBy(x => x.Key);
 
             //var partitionedAttributes = Partition(attributes);
             var attributeTables = new List<string>();

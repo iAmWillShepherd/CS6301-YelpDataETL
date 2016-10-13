@@ -5,6 +5,7 @@ using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Dapper;
 using Newtonsoft.Json.Linq;
 
@@ -53,7 +54,7 @@ namespace YelpDataETL.Loaders
                 {2});";
 
         private static string InsertHoursSql =>
-            @"INSERT INTO hours (
+            @"INSERT INTO business_hour (
                 business_id,
                 day,
                 close,
@@ -74,7 +75,7 @@ namespace YelpDataETL.Loaders
                         BusinessId = (string)x["business_id"],
                         Name = (string)x["name"],
                         FullAddress = (string)x["full_address"],
-                        City = (string)x["jType.city"],
+                        City = (string)x["city"],
                         State = (string)x["state"],
                         Latitude =  x["latitude"] == null ? default(float) : (float)x["latitude"],
                         Longitude = x["longitude"] == null? default(float) : (float)x["longitude"],
@@ -84,19 +85,14 @@ namespace YelpDataETL.Loaders
                     };
 
                     foreach (var category in x["categories"].Children())
-                    {
                         record.Categories.Add(category.ToString());
-                    }
 
                     foreach (var attribute in x["attributes"].Children())
                     {
-                        var property = ((JProperty) attribute);
+                        var property = ((JProperty)attribute);
                         var propertyType = GetClrType(property.Value.Type);
-                        
-                        if (propertyType == typeof(IEnumerable))
-                        {
-                            
-                        }
+
+                        if (propertyType == typeof(IEnumerable)) { }
                         else
                         {
                             record.Attributes.Add(new BusinessAttributeInfo {
@@ -111,7 +107,16 @@ namespace YelpDataETL.Loaders
 
                     foreach (var hour in x["hours"])
                     {
-                        
+                        var property = ((JProperty)hour);
+                        string day = property.Name.ToUpper();
+                        string close = property.Value["close"].ToString();
+                        string open = property.Value["open"].ToString();
+
+                        record.Hours.Add(new BusinessHour {
+                            Day = day,
+                            Open = open,
+                            Close = close
+                        });
                     }
 
                     return record;
@@ -125,31 +130,89 @@ namespace YelpDataETL.Loaders
             {
                 var businesses = records as IList<Business> ?? records.ToList();
 
-                var attributes = businesses
-                    .SelectMany(x => x.Attributes)
-                    .DistinctBy(y => y.Key);
+                CreateTables(connection, businesses);
 
-                var categories = businesses
-                    .SelectMany(x => x.Categories)
-                    .Distinct();
+                //Breaking conventions beceause I need them connections in my life!
+                var t1 = Task.Run(() => {
+                    var conn = Helpers.CreateConnection();
 
-                var sqlScripts = BuildAtrributeTables(attributes).Union(BuildCategoryTables(categories));
+                    conn.Open();
 
-                foreach (string script in sqlScripts)
-                {
-                    connection.Execute(script);
-                }
+                    var tran = conn.BeginTransaction();
 
-                foreach (var record in businesses)
-                {
-                    //Insert categories
-                    foreach (string insertScript in BuildCategoryInsertSql(record.Categories))
+                    try
                     {
-                        connection.Execute(insertScript, new {
-                            business_id = record.BusinessId
-                        }, transaction); 
+                        InsertCategories(conn, tran, businesses);
+
+                        tran.Commit();
                     }
-                }
+                    catch (Exception ex)
+                    {
+                        //mostly don't care at this point
+                        tran.Rollback();
+                        throw;
+                    }
+                    finally
+                    {
+                        tran.Dispose();
+                        conn.Close();
+                        conn.Dispose();
+                    }                    
+                });
+
+                var t2 = Task.Run(() => {
+                    var conn = Helpers.CreateConnection(); ;
+
+                    conn.Open();
+
+                    var tran = conn.BeginTransaction();
+
+                    try
+                    {
+                        foreach (var business in businesses)
+                        {
+                            foreach (var hour in business.Hours)
+                            {
+                                conn.Execute(InsertHoursSql, new {
+                                    @business_id = business.BusinessId,
+                                    @day = hour.Day,
+                                    @open = hour.Open,
+                                    @close = hour.Close
+                                }, tran);
+                            }
+
+                            conn.Execute(InsertBusinessSql, new {
+                                @business_id = business.BusinessId,
+                                @name = business.Name,
+                                @full_address = business.FullAddress,
+                                @city = business.City,
+                                @state = business.State,
+                                @lat = business.Latitude,
+                                @long = business.Longitude,
+                                @stars = business.Stars,
+                                @review_count = business.ReviewCount,
+                                @open = business.Open
+                            }, tran);
+                        }
+
+                        tran.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        //still don't care
+                        tran.Rollback();
+                        throw;
+                    }
+                    finally
+                    {
+                        tran.Dispose();
+                        conn.Close();
+                        conn.Dispose();
+                    }
+
+                });
+
+                Task.WaitAll(t1, t2);
 
                 transaction.Commit();
             }
@@ -168,6 +231,35 @@ namespace YelpDataETL.Loaders
             }
 
             Console.WriteLine("Completed loading business data...");
+        }
+
+        private static void InsertCategories(IDbConnection connection, IDbTransaction transaction, IList<Business> businesses)
+        {
+            foreach (var record in businesses)
+            {
+                //Insert categories
+                foreach (string insertScript in BuildCategoryInsertSql(record.Categories))
+                {
+                    connection.Execute(insertScript, new {
+                        business_id = record.BusinessId
+                    }, transaction);
+                }
+            }
+        }
+
+        private static void CreateTables(IDbConnection connection, IList<Business> businesses)
+        {
+            var attributes = businesses
+                .SelectMany(x => x.Attributes)
+                .DistinctBy(y => y.Key);
+
+            var categories = businesses
+                .SelectMany(x => x.Categories)
+                .Distinct();
+
+            var sqlScripts = BuildAtrributeTables(attributes).Union(BuildCategoryTables(categories));
+
+            foreach (string script in sqlScripts) connection.Execute(script);
         }
 
         private static IEnumerable<string> BuildCategoryTables(IEnumerable<string> categories)

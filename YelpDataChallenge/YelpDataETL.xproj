@@ -11,9 +11,15 @@
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
   </PropertyGroup>
-
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <DnxInvisibleContent Include="data\yelp_academic_dataset_business.json" />
+    <DnxInvisibleContent Include="data\yelp_academic_dataset_checkin.json" />
+    <DnxInvisibleContent Include="data\yelp_academic_dataset_review.json" />
+    <DnxInvisibleContent Include="data\yelp_academic_dataset_tip.json" />
+    <DnxInvisibleContent Include="data\yelp_academic_dataset_user.json" />
+  </ItemGroup>
   <Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>

@@ -1,24 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 using YelpDataETL.Loaders;
 
 namespace YelpDataETL
 {
     public class Program
-    {
-        private static MySqlConnection Connection
-            => new MySqlConnection("server=localhost;user=root;password=P@ssword!;database=yelp;port=3306;");
-
+    {    
         public static void Main(string[] args)
         {
             var loaders = new List<Task> {
-                Task.Run(() => BusinessLoader.Load(Connection))
-                // Task.Run(() => CheckinLoader.Load(connection)),
-                // Task.Run(() => ReviewLoader.Load(connection)),
-                // Task.Run(() => TipLoader.Load(connection)),
-                // Task.Run(() => UserLoader.Load(connection))
+                Task.Run(() => BusinessLoader.Load(Helpers.CreateConnection())),
+                Task.Run(() => CheckinLoader.Load(Helpers.CreateConnection())),
+                Task.Run(() => ReviewLoader.Load(Helpers.CreateConnection())),
+                Task.Run(() => TipLoader.Load(Helpers.CreateConnection())),
+                Task.Run(() => UserLoader.Load(Helpers.CreateConnection()))
             };
 
             Task.WaitAll(loaders.ToArray());

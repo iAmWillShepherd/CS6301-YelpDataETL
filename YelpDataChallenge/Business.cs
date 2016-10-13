@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace YelpDataETL
@@ -16,13 +17,13 @@ namespace YelpDataETL
         public bool? Open { get; set; }
         public List<string> Categories { get; set; }
         public List<BusinessAttributeInfo> Attributes { get; set; }
-        public Dictionary<string, KeyValuePair<string, string>> Hours { get; set; }
+        public List<BusinessHour> Hours { get; set; }
 
         public Business()
         {
             Categories = new List<string>();
             Attributes = new List<BusinessAttributeInfo>();
-            Hours = new Dictionary<string, KeyValuePair<string, string>>();
+            Hours = new List<BusinessHour>();
         }
     }
 }

@@ -1,10 +1,10 @@
 CREATE DATABASE  IF NOT EXISTS `yelp` /*!40100 DEFAULT CHARACTER SET latin1 */;
 USE `yelp`;
--- MySQL dump 10.13  Distrib 5.7.12, for osx10.9 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.12, for Win64 (x86_64)
 --
 -- Host: localhost    Database: yelp
 -- ------------------------------------------------------
--- Server version	5.7.15
+-- Server version	5.7.14-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,6 +16,62 @@ USE `yelp`;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `business`
+--
+
+DROP TABLE IF EXISTS `business`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `business` (
+  `business_id` varchar(45) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `full_address` varchar(100) NOT NULL,
+  `city` varchar(45) NOT NULL,
+  `state` varchar(5) NOT NULL,
+  `longitude` float NOT NULL,
+  `latitude` float NOT NULL,
+  `stars` float DEFAULT '0',
+  `review_count` int(11) DEFAULT '0',
+  `open` tinyint(4) DEFAULT '0',
+  PRIMARY KEY (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `business`
+--
+
+LOCK TABLES `business` WRITE;
+/*!40000 ALTER TABLE `business` DISABLE KEYS */;
+/*!40000 ALTER TABLE `business` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `business_hour`
+--
+
+DROP TABLE IF EXISTS `business_hour`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `business_hour` (
+  `business_id` varchar(45) NOT NULL,
+  `day` varchar(10) NOT NULL,
+  `open` time DEFAULT NULL,
+  `close` time DEFAULT NULL,
+  PRIMARY KEY (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `business_hour`
+--
+
+LOCK TABLES `business_hour` WRITE;
+/*!40000 ALTER TABLE `business_hour` DISABLE KEYS */;
+/*!40000 ALTER TABLE `business_hour` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `checkin`
@@ -56,26 +112,13 @@ CREATE TABLE `checkin` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `business`
+-- Dumping data for table `checkin`
 --
 
-DROP TABLE IF EXISTS `business`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `business` (
-  `business_id` varchar(45) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `full_address` varchar(100) NOT NULL,
-  `city` varchar(45) NOT NULL,
-  `state` varchar(5) NOT NULL,
-  `longitude` float NOT NULL,
-  `latitude` float NOT NULL,
-  `stars` float DEFAULT '0',
-  `review_count` int(11) DEFAULT '0',
-  `open` tinyint(4) DEFAULT '0',
-  PRIMARY KEY (`business_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+LOCK TABLES `checkin` WRITE;
+/*!40000 ALTER TABLE `checkin` DISABLE KEYS */;
+/*!40000 ALTER TABLE `checkin` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `review`
@@ -98,6 +141,15 @@ CREATE TABLE `review` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `review`
+--
+
+LOCK TABLES `review` WRITE;
+/*!40000 ALTER TABLE `review` DISABLE KEYS */;
+/*!40000 ALTER TABLE `review` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `tip`
 --
 
@@ -113,6 +165,15 @@ CREATE TABLE `tip` (
   PRIMARY KEY (`business_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tip`
+--
+
+LOCK TABLES `tip` WRITE;
+/*!40000 ALTER TABLE `tip` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tip` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `user`
@@ -131,6 +192,15 @@ CREATE TABLE `user` (
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user`
+--
+
+LOCK TABLES `user` WRITE;
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `user_compliment`
@@ -157,6 +227,15 @@ CREATE TABLE `user_compliment` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `user_compliment`
+--
+
+LOCK TABLES `user_compliment` WRITE;
+/*!40000 ALTER TABLE `user_compliment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_compliment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `user_elite_status`
 --
 
@@ -169,6 +248,15 @@ CREATE TABLE `user_elite_status` (
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_elite_status`
+--
+
+LOCK TABLES `user_elite_status` WRITE;
+/*!40000 ALTER TABLE `user_elite_status` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_elite_status` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `user_friend`
@@ -185,6 +273,15 @@ CREATE TABLE `user_friend` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `user_friend`
+--
+
+LOCK TABLES `user_friend` WRITE;
+/*!40000 ALTER TABLE `user_friend` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_friend` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `user_vote`
 --
 
@@ -199,6 +296,15 @@ CREATE TABLE `user_vote` (
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_vote`
+--
+
+LOCK TABLES `user_vote` WRITE;
+/*!40000 ALTER TABLE `user_vote` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_vote` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -209,4 +315,4 @@ CREATE TABLE `user_vote` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-10-12 18:07:51
+-- Dump completed on 2016-10-13 15:01:52

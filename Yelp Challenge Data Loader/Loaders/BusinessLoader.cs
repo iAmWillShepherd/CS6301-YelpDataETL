@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
 using Dapper;
+using Newtonsoft.Json.Linq;
 
 namespace YelpDataLoader
 {
@@ -149,7 +150,7 @@ namespace YelpDataLoader
                             Value = attribute.Value.ToString()
                         });
 
-                        if (attribute.Type == Newtonsoft.Json.Linq.JTokenType.Object)
+                        if (attribute.Type == JTokenType.Object)
                         {
                             foreach (var child in attribute.ChildrenTokens)
                             {

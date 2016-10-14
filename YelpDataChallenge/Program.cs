@@ -39,9 +39,6 @@ namespace YelpDataETL
                 var t1 = Task.Run(() => BusinessLoader.Load(Helpers.CreateConnectionToYelpDb()));
                 var t2 = Task.Run(() => ReviewLoader.Load(Helpers.CreateConnectionToYelpDb()));
 
-                t1.Start();
-                t2.Start();
-
                 //Faster loaders can run sequencially
                 CheckinLoader.Load(Helpers.CreateConnectionToYelpDb());
                 TipLoader.Load(Helpers.CreateConnectionToYelpDb());

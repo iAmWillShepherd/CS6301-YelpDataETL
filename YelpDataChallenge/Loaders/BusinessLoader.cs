@@ -75,7 +75,7 @@ namespace YelpDataETL.Loaders
 
             connection.Open();
 
-            CreateCategoryAndArributeTables(connection, businesses);
+            CreateCategoryAndArributeTables(connection, businesses);    //disposing connection here until code is refactored
             InsertBusinessData(businesses);
 
             Console.WriteLine($"{nameof(BusinessLoader)} - Load complete.");
@@ -142,100 +142,88 @@ namespace YelpDataETL.Loaders
 
         private static void InsertBusinessData(IList<Business> businesses)
         {
+            //Breaking conventions beceause I need them connections in my life!
+            var conn = Helpers.CreateConnectionToYelpDb();
+
+            conn.Open();
+
+            var tran = conn.BeginTransaction();
+
             try
             {
-                //Breaking conventions beceause I need them connections in my life!
-                var t1 = Task.Run(() => {
-                    var conn = Helpers.CreateConnectionToYelpDb();
+                Console.WriteLine($"{nameof(BusinessLoader)} - Inserting categories...");
 
-                    conn.Open();
+                InsertCategories(conn, tran, businesses);
+                tran.Commit();
 
-                    var tran = conn.BeginTransaction();
-
-                    try
-                    {
-                        Console.WriteLine($"{nameof(BusinessLoader)} - Inserting categories...");
-
-                        InsertCategories(conn, tran, businesses);
-                        tran.Commit();
-
-                        Console.WriteLine($"{nameof(BusinessLoader)} - Categories inserted.");
-                    }
-                    catch (Exception)
-                    {
-                        tran.Rollback();
-                        throw;
-                    }
-                    finally
-                    {
-                        tran.Dispose();
-                        conn.Close();
-                        conn.Dispose();
-                    }
-                });
-
-                var t2 = Task.Run(() => {
-                    var conn = Helpers.CreateConnectionToYelpDb();
-
-                    conn.Open();
-
-                    var tran = conn.BeginTransaction();
-
-                    try
-                    {
-                        Console.WriteLine($"{nameof(BusinessLoader)} - Inserting businesses and their hours...");
-
-                        foreach (var business in businesses)
-                        {
-                            foreach (var hour in business.Hours)
-                            {
-                                conn.Execute(InsertHoursSql, new {
-                                    @business_id = business.BusinessId,
-                                    @day = hour.Day,
-                                    @open = hour.Open,
-                                    @close = hour.Close
-                                }, tran);
-                            }
-
-                            conn.Execute(InsertBusinessSql, new {
-                                @business_id = business.BusinessId,
-                                @name = business.Name,
-                                @full_address = business.FullAddress,
-                                @city = business.City,
-                                @state = business.State,
-                                @lat = business.Latitude,
-                                @long = business.Longitude,
-                                @stars = business.Stars,
-                                @review_count = business.ReviewCount,
-                                @open = business.Open
-                            }, tran);
-                        }
-
-                        tran.Commit();
-
-                        Console.WriteLine($"{nameof(BusinessLoader)} - Businesses and their hours inserted.");
-                    }
-                    catch (Exception)
-                    {
-                        tran.Rollback();
-                        throw;
-                    }
-                    finally
-                    {
-                        tran.Dispose();
-                        conn.Close();
-                        conn.Dispose();
-                    }
-                });
-
-                Task.WaitAll(t1, t2);
+                Console.WriteLine($"{nameof(BusinessLoader)} - Categories inserted.");
             }
-            catch (AggregateException aEx)
+            catch (Exception)
             {
-                foreach (var ex in aEx.Flatten().InnerExceptions)
-                    Console.WriteLine($"{nameof(BusinessLoader)} - ERROR: {ex.Message}.");
+                Console.WriteLine($"{nameof(BusinessLoader)} - Rolling back category insert...");
+                tran.Rollback();
+                Console.WriteLine($"{nameof(BusinessLoader)} - Category insert rollback complete.");
+            }
+            finally
+            {
+                tran.Dispose();
+                conn.Close();
+                conn.Dispose();
+            }
+
+            conn = Helpers.CreateConnectionToYelpDb();
+
+            conn.Open();
+
+            tran = conn.BeginTransaction();
+
+            try
+            {
+                Console.WriteLine($"{nameof(BusinessLoader)} - Inserting businesses and their hours...");
+
+                foreach (var business in businesses)
+                {
+                    foreach (var hour in business.Hours)
+                    {
+                        conn.Execute(InsertHoursSql, new {
+                            @business_id = business.BusinessId,
+                            @day = hour.Day,
+                            @open = hour.Open,
+                            @close = hour.Close
+                        }, tran);
+                    }
+
+                    conn.Execute(InsertBusinessSql, new {
+                        @business_id = business.BusinessId,
+                        @name = business.Name,
+                        @full_address = business.FullAddress,
+                        @city = business.City,
+                        @state = business.State,
+                        @lat = business.Latitude,
+                        @long = business.Longitude,
+                        @stars = business.Stars,
+                        @review_count = business.ReviewCount,
+                        @open = business.Open
+                    }, tran);
+                }
+
+                tran.Commit();
+
+                Console.WriteLine($"{nameof(BusinessLoader)} - Businesses and their hours inserted.");
+            }
+            catch (Exception)
+            {
+                tran.Rollback();
+                throw;
+            }
+            finally
+            {
+                tran.Dispose();
+                conn.Close();
+                conn.Dispose();
             }
         }
+
 
         private static void InsertCategories(IDbConnection connection, IDbTransaction transaction, IList<Business> businesses)
         {
@@ -263,6 +251,7 @@ namespace YelpDataETL.Loaders
 
             var sqlScripts = BuildAtrributeTables(attributes).Union(BuildCategoryTables(categories));
 
+            connection.Open();
             var transaction = connection.BeginTransaction();
 
             try
@@ -287,7 +276,6 @@ namespace YelpDataETL.Loaders
             {
                 transaction.Dispose();
                 connection.Close();
-                connection.Dispose();
             }
         }
 

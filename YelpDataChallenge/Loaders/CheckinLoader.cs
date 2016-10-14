@@ -145,13 +145,13 @@ namespace YelpDataETL.Loaders
                 }
 
                 transaction.Commit();
-                Console.WriteLine($"{nameof(BusinessLoader)} - Load complete");
+                Console.WriteLine($"{nameof(CheckinLoader)} - Load complete");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"{nameof(CheckinLoader)} - ERROR: {ex.Message}. Rolling back...");
                 transaction.Rollback();
-                Console.WriteLine($"{nameof(BusinessLoader)} - Rollback complete.");
+                Console.WriteLine($"{nameof(CheckinLoader)} - Rollback complete.");
 
                 throw;
             }

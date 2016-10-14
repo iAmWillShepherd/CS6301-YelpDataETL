@@ -13,7 +13,7 @@ namespace YelpDataETL
     {
         public static void Main(string[] args)
         {
-            var conn = new MySqlConnection("server=localhost;user=root;password=P@ssword!;port=3306;");
+            var conn = new MySqlConnection("server=localhost;user=yelp_etl;password=P@ssword!;port=3306;");
 
             Console.WriteLine("Creating database: yelp...");
             
@@ -33,13 +33,16 @@ namespace YelpDataETL
             Console.WriteLine("Database created.");
             Console.WriteLine("Staring load...");
 
+            //Long running task should start first
             var loaders = new List<Task> {
-                Task.Run(() => BusinessLoader.Load(Helpers.CreateConnectionToYelpDb())),
-                Task.Run(() => CheckinLoader.Load(Helpers.CreateConnectionToYelpDb())),
-                Task.Run(() => ReviewLoader.Load(Helpers.CreateConnectionToYelpDb())),
-                Task.Run(() => TipLoader.Load(Helpers.CreateConnectionToYelpDb())),
-                Task.Run(() => UserLoader.Load(Helpers.CreateConnectionToYelpDb()))
+                Task.Run(() => BusinessLoader.Load(Helpers.CreateConnectionToYelpDb())),                
+                Task.Run(() => ReviewLoader.Load(Helpers.CreateConnectionToYelpDb())),             
             };
+
+            //Faster loaders can run sequencially
+            CheckinLoader.Load(Helpers.CreateConnectionToYelpDb());
+            TipLoader.Load(Helpers.CreateConnectionToYelpDb());
+            UserLoader.Load(Helpers.CreateConnectionToYelpDb());            
 
             try
             {
@@ -54,6 +57,12 @@ namespace YelpDataETL
                 {
                     Console.WriteLine(ex.Message);    
                 }
+
+                Console.WriteLine("Dropping database: yelp...");
+
+                conn.Execute("DROP DATABASE IF EXISTS yelp");
+
+                Console.WriteLine("Database dropped.");
             }          
         }
     }

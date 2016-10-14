@@ -63,12 +63,26 @@ namespace YelpDataETL.Loaders
                 @business_id,
                 @day,
                 @close,
-                @open);";    
+                @open);";
 
         public static void Load(IDbConnection connection)
         {
             Console.WriteLine($"{nameof(BusinessLoader)} - Starting load...");
 
+            IEnumerable<Business> records = ParseBusinesJson();
+
+            var businesses = records as IList<Business> ?? records.ToList();
+
+            connection.Open();
+
+            CreateCategoryAndArributeTables(connection, businesses);
+            InsertBusinessData(businesses);
+
+            Console.WriteLine($"{nameof(BusinessLoader)} - Load complete.");
+        }
+
+        private static IEnumerable<Business> ParseBusinesJson()
+        {
             var records = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_business"))
                 .Select(JObject.Parse)
                 .Select(x => {
@@ -79,8 +93,8 @@ namespace YelpDataETL.Loaders
                         FullAddress = (string)x["full_address"],
                         City = (string)x["city"],
                         State = (string)x["state"],
-                        Latitude =  x["latitude"] == null ? default(float) : (float)x["latitude"],
-                        Longitude = x["longitude"] == null? default(float) : (float)x["longitude"],
+                        Latitude = x["latitude"] == null ? default(float) : (float)x["latitude"],
+                        Longitude = x["longitude"] == null ? default(float) : (float)x["longitude"],
                         Stars = x["stars"] == null ? default(float) : (float)x["stars"],
                         ReviewCount = x["review_count"] == null ? 0 : (int)x["review_count"],
                         Open = (bool)x["open"]
@@ -123,17 +137,13 @@ namespace YelpDataETL.Loaders
 
                     return record;
                 });
+            return records;
+        }
 
-            connection.Open();
-
-            var transaction = connection.BeginTransaction();
-
+        private static void InsertBusinessData(IList<Business> businesses)
+        {
             try
             {
-                var businesses = records as IList<Business> ?? records.ToList();                
-               
-                CreateTables(connection, transaction, businesses);
-
                 //Breaking conventions beceause I need them connections in my life!
                 var t1 = Task.Run(() => {
                     var conn = Helpers.CreateConnectionToYelpDb();
@@ -144,17 +154,15 @@ namespace YelpDataETL.Loaders
 
                     try
                     {
-                        Console.WriteLine("Inserting business categories...");
+                        Console.WriteLine($"{nameof(BusinessLoader)} - Inserting categories...");
 
                         InsertCategories(conn, tran, businesses);
-
                         tran.Commit();
 
-                        Console.WriteLine("Completed inserting business categories.");
+                        Console.WriteLine($"{nameof(BusinessLoader)} - Categories inserted.");
                     }
                     catch (Exception)
                     {
-                        //mostly don't care at this point
                         tran.Rollback();
                         throw;
                     }
@@ -163,11 +171,11 @@ namespace YelpDataETL.Loaders
                         tran.Dispose();
                         conn.Close();
                         conn.Dispose();
-                    }                    
+                    }
                 });
 
                 var t2 = Task.Run(() => {
-                    var conn = Helpers.CreateConnectionToYelpDb(); ;
+                    var conn = Helpers.CreateConnectionToYelpDb();
 
                     conn.Open();
 
@@ -175,7 +183,7 @@ namespace YelpDataETL.Loaders
 
                     try
                     {
-                        Console.WriteLine("Inserting businesses and hours...");
+                        Console.WriteLine($"{nameof(BusinessLoader)} - Inserting businesses and their hours...");
 
                         foreach (var business in businesses)
                         {
@@ -205,11 +213,10 @@ namespace YelpDataETL.Loaders
 
                         tran.Commit();
 
-                        Console.WriteLine("Completed inserting businesses.");
+                        Console.WriteLine($"{nameof(BusinessLoader)} - Businesses and their hours inserted.");
                     }
                     catch (Exception)
                     {
-                        //still don't care
                         tran.Rollback();
                         throw;
                     }
@@ -219,29 +226,15 @@ namespace YelpDataETL.Loaders
                         conn.Close();
                         conn.Dispose();
                     }
-
                 });
 
                 Task.WaitAll(t1, t2);
-
-                transaction.Commit();
-
-                Console.WriteLine($"{nameof(BusinessLoader)} - Load complete.");
             }
-            catch (Exception ex)
+            catch (AggregateException aEx)
             {
-                Console.WriteLine($"{nameof(BusinessLoader)} - ERROR: {ex.Message}. Rolling back");
-                transaction.Rollback();
-                Console.WriteLine($"{nameof(BusinessLoader)} - Rollback completed.");
-
-                throw;
+                foreach (var ex in aEx.Flatten().InnerExceptions)
+                    Console.WriteLine($"{nameof(BusinessLoader)} - ERROR: {ex.Message}.");
             }
-            finally
-            {
-                transaction.Dispose();
-                connection.Close();
-                connection.Dispose();
-            }            
         }
 
         private static void InsertCategories(IDbConnection connection, IDbTransaction transaction, IList<Business> businesses)
@@ -258,10 +251,8 @@ namespace YelpDataETL.Loaders
             }
         }
 
-        private static void CreateTables(IDbConnection connection, IDbTransaction transaction, IList<Business> businesses)
+        private static void CreateCategoryAndArributeTables(IDbConnection connection, IList<Business> businesses)
         {
-            Console.WriteLine("Creating business attribute and category tables...");
-
             var attributes = businesses
                 .SelectMany(x => x.Attributes)
                 .DistinctBy(y => y.Key);
@@ -272,9 +263,32 @@ namespace YelpDataETL.Loaders
 
             var sqlScripts = BuildAtrributeTables(attributes).Union(BuildCategoryTables(categories));
 
-            foreach (string script in sqlScripts) connection.Execute(script, transaction);
+            var transaction = connection.BeginTransaction();
 
-            Console.WriteLine("Created business attribute and category tables.");
+            try
+            {
+                Console.WriteLine($"{nameof(BusinessLoader)} - Creating attribute and category tables...");
+
+                foreach (string script in sqlScripts) connection.Execute(script, transaction);
+                transaction.Commit();
+
+                Console.WriteLine($"{nameof(BusinessLoader)} - Tables created.");
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{nameof(BusinessLoader)} - ERROR: {ex.Message}. Rolling back");
+                transaction.Rollback();
+                Console.WriteLine($"{nameof(BusinessLoader)} - Rollback completed.");
+
+                throw;
+            }
+            finally
+            {
+                transaction.Dispose();
+                connection.Close();
+                connection.Dispose();
+            }
         }
 
         private static IEnumerable<string> BuildCategoryTables(IEnumerable<string> categories)
@@ -298,7 +312,7 @@ namespace YelpDataETL.Loaders
         {
             var businessAttributeInfos = attributes as IList<BusinessAttributeInfo> ?? attributes.ToList();
 
-            var objs = businessAttributeInfos.Where(attr => attr.ValueType == typeof(object)).ToList();            
+            var objs = businessAttributeInfos.Where(attr => attr.ValueType == typeof(object)).ToList();
             var groupedAttributes = businessAttributeInfos.GroupBy(x => x.Key);
             //var partitionedAttributes = Partition(attributes);
             var attributeTables = new List<string>();
@@ -338,7 +352,7 @@ namespace YelpDataETL.Loaders
             {
                 ulong idx = Fnv1Hash.Create(Encoding.ASCII.GetBytes(x)) % (ulong)partitions.Count;
 
-                partitions[(int)idx].Add(x); 
+                partitions[(int)idx].Add(x);
             }
 
             return partitions;

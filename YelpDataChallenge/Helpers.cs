@@ -11,7 +11,7 @@ namespace YelpDataETL
         private static string BasePath => Path.Combine(Directory.GetCurrentDirectory(), "data");
 
         public static MySqlConnection CreateConnectionToYelpDb()
-            => new MySqlConnection("server=localhost;user=root;password=P@ssword!;database=yelp;port=3306;");
+            => new MySqlConnection("server=localhost;user=yelp_etl;password=P@ssword!;database=yelp;port=3306;");
 
         public static IEnumerable<TSource> DistinctBy<TSource, TKey>
             (this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)

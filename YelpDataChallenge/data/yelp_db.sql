@@ -27,26 +27,17 @@ DROP TABLE IF EXISTS `business`;
 CREATE TABLE `business` (
   `business_id` varchar(45) NOT NULL,
   `name` varchar(100) NOT NULL,
-  `full_address` varchar(100) NOT NULL,
-  `city` varchar(45) NOT NULL,
-  `state` varchar(5) NOT NULL,
-  `longitude` float NOT NULL,
-  `latitude` float NOT NULL,
+  `full_address` varchar(150) DEFAULT NULL,
+  `city` varchar(45) DEFAULT NULL,
+  `state` varchar(5) DEFAULT NULL,
+  `longitude` float DEFAULT NULL,
+  `latitude` float DEFAULT NULL,
   `stars` float DEFAULT '0',
   `review_count` int(11) DEFAULT '0',
   `open` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`business_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `business`
---
-
-LOCK TABLES `business` WRITE;
-/*!40000 ALTER TABLE `business` DISABLE KEYS */;
-/*!40000 ALTER TABLE `business` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `business_hour`
@@ -60,18 +51,9 @@ CREATE TABLE `business_hour` (
   `day` varchar(10) NOT NULL,
   `open` time DEFAULT NULL,
   `close` time DEFAULT NULL,
-  PRIMARY KEY (`business_id`)
+  PRIMARY KEY (`business_id`,`day`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `business_hour`
---
-
-LOCK TABLES `business_hour` WRITE;
-/*!40000 ALTER TABLE `business_hour` DISABLE KEYS */;
-/*!40000 ALTER TABLE `business_hour` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `checkin`
@@ -112,15 +94,6 @@ CREATE TABLE `checkin` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `checkin`
---
-
-LOCK TABLES `checkin` WRITE;
-/*!40000 ALTER TABLE `checkin` DISABLE KEYS */;
-/*!40000 ALTER TABLE `checkin` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `review`
 --
 
@@ -131,23 +104,13 @@ CREATE TABLE `review` (
   `business_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `user_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `stars` decimal(2,1) NOT NULL,
-  `text` text,
+  `text` text NOT NULL,
   `date` date NOT NULL,
   `votes_funny` int(11) DEFAULT '0',
   `votes_useful` int(11) DEFAULT '0',
-  `votes_cool` int(11) DEFAULT '0',
-  PRIMARY KEY (`business_id`,`user_id`)
+  `votes_cool` int(11) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `review`
---
-
-LOCK TABLES `review` WRITE;
-/*!40000 ALTER TABLE `review` DISABLE KEYS */;
-/*!40000 ALTER TABLE `review` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `tip`
@@ -167,15 +130,6 @@ CREATE TABLE `tip` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `tip`
---
-
-LOCK TABLES `tip` WRITE;
-/*!40000 ALTER TABLE `tip` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tip` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `user`
 --
 
@@ -192,15 +146,6 @@ CREATE TABLE `user` (
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user`
---
-
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `user_compliment`
@@ -227,15 +172,6 @@ CREATE TABLE `user_compliment` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `user_compliment`
---
-
-LOCK TABLES `user_compliment` WRITE;
-/*!40000 ALTER TABLE `user_compliment` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user_compliment` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `user_elite_status`
 --
 
@@ -250,15 +186,6 @@ CREATE TABLE `user_elite_status` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `user_elite_status`
---
-
-LOCK TABLES `user_elite_status` WRITE;
-/*!40000 ALTER TABLE `user_elite_status` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user_elite_status` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `user_friend`
 --
 
@@ -267,19 +194,9 @@ DROP TABLE IF EXISTS `user_friend`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user_friend` (
   `user_id` varchar(45) NOT NULL,
-  `friend_user_id` varchar(45) NOT NULL,
-  PRIMARY KEY (`user_id`,`friend_user_id`)
+  `friend_user_id` varchar(45) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user_friend`
---
-
-LOCK TABLES `user_friend` WRITE;
-/*!40000 ALTER TABLE `user_friend` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user_friend` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `user_vote`
@@ -296,15 +213,6 @@ CREATE TABLE `user_vote` (
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user_vote`
---
-
-LOCK TABLES `user_vote` WRITE;
-/*!40000 ALTER TABLE `user_vote` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user_vote` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -315,4 +223,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-10-13 15:01:52
+-- Dump completed on 2016-10-13 22:52:35

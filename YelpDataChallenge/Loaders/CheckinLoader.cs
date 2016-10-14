@@ -68,6 +68,8 @@ namespace YelpDataETL.Loaders
 
         public static void Load(IDbConnection connection)
         {
+            Console.WriteLine("Loading checkins...");
+
             var objs = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_checkin"))
                 .Select(JsonConvert.DeserializeObject)
                 .Select(x =>
@@ -103,14 +105,15 @@ namespace YelpDataETL.Loaders
 
             connection.Open();
 
+            var transaction = connection.BeginTransaction();
+
             try
             {
                 foreach (var obj in objs)
                 {
                     foreach (var kvp in obj.checkinInfo)
                     {
-                        connection.Execute(_sql, new
-                        {
+                        connection.Execute(_sql, new {
                             obj.business_id,
                             day_of_week_id = kvp.Key,
                             hour_0 = kvp.Value[0],
@@ -137,9 +140,16 @@ namespace YelpDataETL.Loaders
                             hour_21 = kvp.Value[21],
                             hour_22 = kvp.Value[22],
                             hour_23 = kvp.Value[23]
-                        });
+                        }, transaction);
                     }
                 }
+
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
             }
             finally
             {
@@ -147,7 +157,7 @@ namespace YelpDataETL.Loaders
                 connection.Dispose();
             }
 
-            Console.WriteLine("Completed loading checkin data...");
+            Console.WriteLine("Completed loading checkins.");
         }
     }
 }

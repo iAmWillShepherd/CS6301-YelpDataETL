@@ -31,6 +31,8 @@ namespace YelpDataETL.Loaders
 
         public static void Load(IDbConnection connection)
         {
+            Console.WriteLine("Loading reviews...");
+
             var objs = File
                 .ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_review"))
                 .Select(JsonConvert.DeserializeObject)
@@ -53,17 +55,26 @@ namespace YelpDataETL.Loaders
 
             connection.Open();
 
+            var transaction = connection.BeginTransaction();
+
             try
             {
-                connection.Execute(_sql, objs);
+                connection.Execute(_sql, objs, transaction);
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
             }
             finally
             {
+                transaction.Dispose();
                 connection.Close();
                 connection.Dispose();
             }
 
-            Console.WriteLine("Completed loading review data...");
+            Console.WriteLine("Completed loading reviews.");
         }
     }
 }

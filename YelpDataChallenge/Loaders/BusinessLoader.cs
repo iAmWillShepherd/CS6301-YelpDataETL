@@ -67,6 +67,8 @@ namespace YelpDataETL.Loaders
 
         public static void Load(IDbConnection connection)
         {
+            Console.WriteLine("Loading businesses...");
+
             var records = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_business"))
                 .Select(JObject.Parse)
                 .Select(x => {
@@ -130,11 +132,11 @@ namespace YelpDataETL.Loaders
             {
                 var businesses = records as IList<Business> ?? records.ToList();
 
-                CreateTables(connection, businesses);
+                CreateTables(connection, transaction, businesses);
 
                 //Breaking conventions beceause I need them connections in my life!
                 var t1 = Task.Run(() => {
-                    var conn = Helpers.CreateConnection();
+                    var conn = Helpers.CreateConnectionToYelpDb();
 
                     conn.Open();
 
@@ -161,7 +163,7 @@ namespace YelpDataETL.Loaders
                 });
 
                 var t2 = Task.Run(() => {
-                    var conn = Helpers.CreateConnection(); ;
+                    var conn = Helpers.CreateConnectionToYelpDb(); ;
 
                     conn.Open();
 
@@ -230,7 +232,7 @@ namespace YelpDataETL.Loaders
                 connection.Dispose();
             }
 
-            Console.WriteLine("Completed loading business data...");
+            Console.WriteLine("Completed loading businesses.");
         }
 
         private static void InsertCategories(IDbConnection connection, IDbTransaction transaction, IList<Business> businesses)
@@ -247,7 +249,7 @@ namespace YelpDataETL.Loaders
             }
         }
 
-        private static void CreateTables(IDbConnection connection, IList<Business> businesses)
+        private static void CreateTables(IDbConnection connection, IDbTransaction transaction, IList<Business> businesses)
         {
             var attributes = businesses
                 .SelectMany(x => x.Attributes)
@@ -259,7 +261,7 @@ namespace YelpDataETL.Loaders
 
             var sqlScripts = BuildAtrributeTables(attributes).Union(BuildCategoryTables(categories));
 
-            foreach (string script in sqlScripts) connection.Execute(script);
+            foreach (string script in sqlScripts) connection.Execute(script, transaction);
         }
 
         private static IEnumerable<string> BuildCategoryTables(IEnumerable<string> categories)

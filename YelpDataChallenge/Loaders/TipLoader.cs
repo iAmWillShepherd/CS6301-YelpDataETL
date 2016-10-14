@@ -25,6 +25,8 @@ namespace YelpDataETL.Loaders
 
         public static void Load(IDbConnection connection)
         {
+            Console.WriteLine("Loading tips...");
+
             var objs = File
                 .ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_tip"))
                 .Select(JsonConvert.DeserializeObject)
@@ -43,17 +45,26 @@ namespace YelpDataETL.Loaders
 
             connection.Open();
 
+            var transaction = connection.BeginTransaction();
+
             try
             {
-                connection.Execute(_sql, objs);
+                connection.Execute(_sql, objs, transaction);
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
             }
             finally
             {
+                transaction.Dispose();
                 connection.Close();
                 connection.Dispose();
             }
 
-            Console.WriteLine("Completed loading tip data...");
+            Console.WriteLine("Completed loading tips.");
         }
     }
 }

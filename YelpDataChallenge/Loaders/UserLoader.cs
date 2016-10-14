@@ -84,6 +84,8 @@ namespace YelpDataETL.Loaders
 
         public static void Load(IDbConnection connection)
         {
+            Console.WriteLine("Loading users...");
+
             var objs = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_user"))
                 .Select(JsonConvert.DeserializeObject)
                 .Select(x =>
@@ -203,11 +205,9 @@ namespace YelpDataETL.Loaders
 
                 transaction.Commit();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message);
                 transaction.Rollback();
-
                 throw;
             }
             finally
@@ -217,7 +217,7 @@ namespace YelpDataETL.Loaders
                 connection.Dispose();
             }
 
-            Console.WriteLine("Completed loading user data...");
+            Console.WriteLine("Completed loading users.");
         }
     }
 }

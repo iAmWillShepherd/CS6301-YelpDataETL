@@ -68,7 +68,7 @@ namespace YelpDataETL.Loaders
 
         public static void Load(IDbConnection connection)
         {
-            Console.WriteLine("Loading checkins...");
+            Console.WriteLine($"{nameof(CheckinLoader)} - Starting load...");
 
             var objs = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_checkin"))
                 .Select(JsonConvert.DeserializeObject)
@@ -145,19 +145,21 @@ namespace YelpDataETL.Loaders
                 }
 
                 transaction.Commit();
+                Console.WriteLine($"{nameof(BusinessLoader)} - Load complete");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"{nameof(CheckinLoader)} - ERROR: {ex.Message}. Rolling back...");
                 transaction.Rollback();
+                Console.WriteLine($"{nameof(BusinessLoader)} - Rollback complete.");
+
                 throw;
             }
             finally
             {
                 connection.Close();
                 connection.Dispose();
-            }
-
-            Console.WriteLine("Completed loading checkins.");
+            }            
         }
     }
 }

@@ -31,7 +31,7 @@ namespace YelpDataETL.Loaders
 
         public static void Load(IDbConnection connection)
         {
-            Console.WriteLine("Loading reviews...");
+            Console.WriteLine($"{nameof(ReviewLoader)} - Starting load...");
 
             var objs = File
                 .ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_review"))
@@ -61,10 +61,13 @@ namespace YelpDataETL.Loaders
             {
                 connection.Execute(_sql, objs, transaction);
                 transaction.Commit();
+                Console.WriteLine($"{nameof(ReviewLoader)} - Load complete.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"{nameof(ReviewLoader)} - ERROR: {ex.Message}. Rolling back...");
                 transaction.Rollback();
+                Console.WriteLine($"{nameof(ReviewLoader)} - Rollback complete.");
                 throw;
             }
             finally
@@ -72,9 +75,7 @@ namespace YelpDataETL.Loaders
                 transaction.Dispose();
                 connection.Close();
                 connection.Dispose();
-            }
-
-            Console.WriteLine("Completed loading reviews.");
+            }           
         }
     }
 }

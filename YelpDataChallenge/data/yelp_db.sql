@@ -89,7 +89,7 @@ CREATE TABLE `checkin` (
   `hour_21` int(11) DEFAULT '0',
   `hour_22` int(11) DEFAULT '0',
   `hour_23` int(11) DEFAULT '0',
-  PRIMARY KEY (`business_id`)
+  PRIMARY KEY (`business_id`, `day_of_week`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -124,8 +124,7 @@ CREATE TABLE `tip` (
   `business_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `user_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `date` date NOT NULL,
-  `likes` int(11) DEFAULT '0',
-  PRIMARY KEY (`business_id`,`user_id`)
+  `likes` int(11) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -142,8 +141,7 @@ CREATE TABLE `user` (
   `review_count` int(11) NOT NULL,
   `average_stars` decimal(3,2) NOT NULL,
   `yelping_since` date NOT NULL,
-  `fans` int(11) DEFAULT NULL,
-  PRIMARY KEY (`user_id`)
+  `fans` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -166,8 +164,7 @@ CREATE TABLE `user_compliment` (
   `photos` int(11) NOT NULL,
   `hot` int(11) NOT NULL,
   `cool` int(11) NOT NULL,
-  `more` int(11) NOT NULL,
-  PRIMARY KEY (`user_id`)
+  `more` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -180,8 +177,7 @@ DROP TABLE IF EXISTS `user_elite_status`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user_elite_status` (
   `user_id` varchar(45) NOT NULL,
-  `year` int(11) NOT NULL,
-  PRIMARY KEY (`user_id`)
+  `year` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -209,8 +205,7 @@ CREATE TABLE `user_vote` (
   `user_id` varchar(45) NOT NULL,
   `funny` int(11) DEFAULT '0',
   `useful` int(11) DEFAULT '0',
-  `cool` int(11) DEFAULT '0',
-  PRIMARY KEY (`user_id`)
+  `cool` int(11) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

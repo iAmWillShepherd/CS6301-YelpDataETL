@@ -67,7 +67,7 @@ namespace YelpDataETL.Loaders
 
         public static void Load(IDbConnection connection)
         {
-            Console.WriteLine("Loading businesses...");
+            Console.WriteLine($"{nameof(BusinessLoader)} - Starting load...");
 
             var records = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_business"))
                 .Select(JObject.Parse)
@@ -130,8 +130,8 @@ namespace YelpDataETL.Loaders
 
             try
             {
-                var businesses = records as IList<Business> ?? records.ToList();
-
+                var businesses = records as IList<Business> ?? records.ToList();                
+               
                 CreateTables(connection, transaction, businesses);
 
                 //Breaking conventions beceause I need them connections in my life!
@@ -144,11 +144,15 @@ namespace YelpDataETL.Loaders
 
                     try
                     {
+                        Console.WriteLine("Inserting business categories...");
+
                         InsertCategories(conn, tran, businesses);
 
                         tran.Commit();
+
+                        Console.WriteLine("Completed inserting business categories.");
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         //mostly don't care at this point
                         tran.Rollback();
@@ -171,6 +175,8 @@ namespace YelpDataETL.Loaders
 
                     try
                     {
+                        Console.WriteLine("Inserting businesses and hours...");
+
                         foreach (var business in businesses)
                         {
                             foreach (var hour in business.Hours)
@@ -198,8 +204,10 @@ namespace YelpDataETL.Loaders
                         }
 
                         tran.Commit();
+
+                        Console.WriteLine("Completed inserting businesses.");
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         //still don't care
                         tran.Rollback();
@@ -217,11 +225,14 @@ namespace YelpDataETL.Loaders
                 Task.WaitAll(t1, t2);
 
                 transaction.Commit();
+
+                Console.WriteLine($"{nameof(BusinessLoader)} - Load complete.");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"{nameof(BusinessLoader)} - ERROR: {ex.Message}. Rolling back");
                 transaction.Rollback();
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"{nameof(BusinessLoader)} - Rollback completed.");
 
                 throw;
             }
@@ -230,9 +241,7 @@ namespace YelpDataETL.Loaders
                 transaction.Dispose();
                 connection.Close();
                 connection.Dispose();
-            }
-
-            Console.WriteLine("Completed loading businesses.");
+            }            
         }
 
         private static void InsertCategories(IDbConnection connection, IDbTransaction transaction, IList<Business> businesses)
@@ -251,6 +260,8 @@ namespace YelpDataETL.Loaders
 
         private static void CreateTables(IDbConnection connection, IDbTransaction transaction, IList<Business> businesses)
         {
+            Console.WriteLine("Creating business attribute and category tables...");
+
             var attributes = businesses
                 .SelectMany(x => x.Attributes)
                 .DistinctBy(y => y.Key);
@@ -262,6 +273,8 @@ namespace YelpDataETL.Loaders
             var sqlScripts = BuildAtrributeTables(attributes).Union(BuildCategoryTables(categories));
 
             foreach (string script in sqlScripts) connection.Execute(script, transaction);
+
+            Console.WriteLine("Created business attribute and category tables.");
         }
 
         private static IEnumerable<string> BuildCategoryTables(IEnumerable<string> categories)

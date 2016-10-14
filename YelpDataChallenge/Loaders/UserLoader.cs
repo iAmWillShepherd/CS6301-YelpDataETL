@@ -84,7 +84,7 @@ namespace YelpDataETL.Loaders
 
         public static void Load(IDbConnection connection)
         {
-            Console.WriteLine("Loading users...");
+            Console.WriteLine($"{nameof(UserLoader)} - Starting load...");
 
             var objs = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_user"))
                 .Select(JsonConvert.DeserializeObject)
@@ -204,10 +204,15 @@ namespace YelpDataETL.Loaders
                 }
 
                 transaction.Commit();
+
+                Console.WriteLine($"{nameof(UserLoader)} - Load complete.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"{nameof(UserLoader)} - ERROR: {ex.Message}. Rolling back...");
                 transaction.Rollback();
+                Console.WriteLine($"{nameof(UserLoader)} - Rollback complete.");
+
                 throw;
             }
             finally
@@ -215,9 +220,7 @@ namespace YelpDataETL.Loaders
                 transaction.Dispose();
                 connection.Close();
                 connection.Dispose();
-            }
-
-            Console.WriteLine("Completed loading users.");
+            }            
         }
     }
 }

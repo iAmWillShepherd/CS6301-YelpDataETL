@@ -10,16 +10,16 @@ namespace YelpDataETL.Loaders
     public class TipLoader
     {
         private static string _sql =
-            @"INSERT INTO tip (
-                text,
+            @"INSERT INTO tip (                
                 business_id,
                 user_id,
+                text,
                 date,
                 likes)
             VALUES (
-                @text,
                 @business_id,
                 @user_id,
+                @text,
                 @date,
                 @likes);";
 
@@ -30,14 +30,13 @@ namespace YelpDataETL.Loaders
             var objs = File
                 .ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_tip"))
                 .Select(JsonConvert.DeserializeObject)
-                .Select(x =>
-                {
+                .Select(x => {
                     dynamic obj = x;
 
                     return new {
-                        obj.text,
                         obj.business_id,
                         obj.user_id,
+                        obj.text,
                         obj.date,
                         obj.likes
                     };
@@ -67,7 +66,7 @@ namespace YelpDataETL.Loaders
                 transaction.Dispose();
                 connection.Close();
                 connection.Dispose();
-            }            
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.IO;
@@ -36,12 +37,10 @@ namespace YelpDataETL.Loaders
             var objs = File
                 .ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_review"))
                 .Select(JsonConvert.DeserializeObject)
-                .Select(x =>
-                {
+                .Select(x => {
                     dynamic obj = x;
 
-                    return new
-                    {
+                    return new {
                         obj.business_id,
                         obj.user_id,
                         obj.stars,
@@ -60,6 +59,7 @@ namespace YelpDataETL.Loaders
             try
             {
                 connection.Execute(_sql, objs, transaction);
+
                 transaction.Commit();
                 Console.WriteLine($"{nameof(ReviewLoader)} - Load complete.");
             }
@@ -68,6 +68,7 @@ namespace YelpDataETL.Loaders
                 Console.WriteLine($"{nameof(ReviewLoader)} - ERROR: {ex.Message}. Rolling back...");
                 transaction.Rollback();
                 Console.WriteLine($"{nameof(ReviewLoader)} - Rollback complete.");
+
                 throw;
             }
             finally

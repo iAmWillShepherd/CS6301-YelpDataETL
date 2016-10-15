@@ -69,12 +69,11 @@ namespace YelpDataETL.Loaders
         {
             Console.WriteLine($"{nameof(BusinessLoader)} - Starting load...");
 
-            IEnumerable<Business> records = ParseBusinesJson();
+            var records = ParseBusinesJson();
+            var businessList = records as IList<Business> ?? records.ToList();
 
-            var businesses = records as IList<Business> ?? records.ToList();
-
-            CreateCategoryAndArributeTables(businesses);    //disposing connection here until code is refactored
-            InsertBusinessData(businesses);
+            CreateCategoryAndArributeTables(businessList);    //disposing connection here until code is refactored
+            InsertBusinessData(businessList);
 
             Console.WriteLine($"{nameof(BusinessLoader)} - Load complete.");
         }
@@ -138,7 +137,7 @@ namespace YelpDataETL.Loaders
             return records;
         }
 
-        private static void InsertBusinessData(IList<Business> businesses)
+        private static void InsertBusinessData(IEnumerable<Business> businesses)
         {
             //Breaking conventions beceause I need them connections in my life!
             var conn = Helpers.CreateConnectionToYelpDb();
@@ -147,11 +146,13 @@ namespace YelpDataETL.Loaders
 
             var tran = conn.BeginTransaction();
 
+            var businessList = businesses as IList<Business> ?? businesses.ToList();
+
             try
             {
                 Console.WriteLine($"{nameof(BusinessLoader)} - Inserting categories...");
 
-                InsertCategories(conn, tran, businesses);
+                InsertCategories(conn, tran, businessList);
                 tran.Commit();
 
                 Console.WriteLine($"{nameof(BusinessLoader)} - Categories inserted.");
@@ -179,7 +180,7 @@ namespace YelpDataETL.Loaders
             {
                 Console.WriteLine($"{nameof(BusinessLoader)} - Inserting businesses and their hours...");
 
-                foreach (var business in businesses)
+                foreach (var business in businessList)
                 {
                     foreach (var hour in business.Hours)
                     {
@@ -221,7 +222,6 @@ namespace YelpDataETL.Loaders
                 conn.Dispose();
             }
         }
-
 
         private static void InsertCategories(IDbConnection connection, IDbTransaction transaction, IList<Business> businesses)
         {

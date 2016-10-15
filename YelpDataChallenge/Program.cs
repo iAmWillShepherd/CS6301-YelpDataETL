@@ -36,15 +36,17 @@ namespace YelpDataETL
                 Console.WriteLine("Starting load...");
 
                 //Long running task should start first
-                var t1 = Task.Run(() => Thread.Sleep(1) /*BusinessLoader.Load(Helpers.CreateConnectionToYelpDb())*/);
+
+                var t1 = Task.Run(() => Thread.Sleep(1));
+                //var t1 = Task.Run(() => BusinessLoader.Load(Helpers.CreateConnectionToYelpDb()));                
                 var t2 = Task.Run(() => ReviewLoader.Load(Helpers.CreateConnectionToYelpDb()));
 
                 //Faster loaders can run sequencially
                 //CheckinLoader.Load(Helpers.CreateConnectionToYelpDb());
-                //TipLoader.Load(Helpers.CreateConnectionToYelpDb());
+                TipLoader.Load(Helpers.CreateConnectionToYelpDb());
                 //UserLoader.Load(Helpers.CreateConnectionToYelpDb());
 
-                Task.WaitAll(new[] {t1, t2});
+                Task.WaitAll(t1, t2);
                 Console.WriteLine("Load complete.");
             }
             catch (AggregateException aEx)

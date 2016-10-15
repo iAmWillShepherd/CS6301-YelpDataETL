@@ -16,7 +16,7 @@
 # Prepare to run
 
 1. Download the dataset from [Yelp]()
-1. Copy the following files into `Yelp Challenge Data Loader/data`
+1. Copy the following files into '/YelpDataChallenge/data`
   * _yelp_academic_dataset_business.json_
   * _yelp_academic_dataset_checkin.json_
   * _yelp_academic_dataset_review.json_
@@ -25,7 +25,7 @@
 
 # Run
 
-1. Using Windows Command Prompt, navigate to `/YelpDataChallenge`
+1. Using Windows Command Prompt, navigate to `YelpDataChallenge`
 1. Run the following commands in this order:
   1. `dotnet restore`
   1. `dotnet build`

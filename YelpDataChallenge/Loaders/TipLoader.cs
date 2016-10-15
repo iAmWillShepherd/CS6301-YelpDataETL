@@ -36,7 +36,7 @@ namespace YelpDataETL.Loaders
                     return new {
                         obj.business_id,
                         obj.user_id,
-                        obj.text,
+                        text = (string)null,
                         obj.date,
                         obj.likes
                     };

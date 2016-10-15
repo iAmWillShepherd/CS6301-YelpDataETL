@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.IO;
@@ -44,7 +43,7 @@ namespace YelpDataETL.Loaders
                         obj.business_id,
                         obj.user_id,
                         obj.stars,
-                        obj.text,
+                        text = (string)null,
                         obj.date,
                         votes_funny = obj.votes?.funny,
                         votes_useful = obj.votes?.useful,

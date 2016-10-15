@@ -104,7 +104,7 @@ CREATE TABLE `review` (
   `business_id` varchar(45) NOT NULL,
   `user_id` varchar(45) NOT NULL,
   `stars` decimal(2,1) NOT NULL,
-  `text` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `text` text COLLATE utf8mb4_unicode_ci,
   `date` date NOT NULL,
   `votes_funny` int(11) DEFAULT '0',
   `votes_useful` int(11) DEFAULT '0',
@@ -123,7 +123,7 @@ DROP TABLE IF EXISTS `tip`;
 CREATE TABLE `tip` (
   `business_id` varchar(45) NOT NULL,
   `user_id` varchar(45) NOT NULL,
-  `text` text NOT NULL,
+  `text` text,
   `date` date NOT NULL,
   `likes` int(11) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

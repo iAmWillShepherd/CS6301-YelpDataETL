@@ -25,7 +25,7 @@
 
 # Run
 
-1. Using Windows Command Prompt, navigate to `/Yelp Challenge Data Loader`
+1. Using Windows Command Prompt, navigate to `/YelpDataChallenge`
 1. Run the following commands in this order:
   1. `dotnet restore`
   1. `dotnet build`

@@ -11,7 +11,7 @@
 
 1. Open MySQL Workbench
 1. Connect to your instance of MySQL
-1. Perform a data import with `Yelp Challenge Data Loader/data/yelp_db.sql`. Make sure to select *Import from Self-Contained File*. [See documentation](https://dev.mysql.com/doc/workbench/en/wb-admin-export-import-management.html)
+1. Create a new user `yelp_etl`, with same password as root. Give this user DBA permissions. Follow [https://dev.mysql.com/doc/workbench/en/wb-mysql-connections-navigator-management-users-and-privileges.html](these instructions)
 
 # Prepare to run
 

@@ -5,7 +5,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Dapper;
 
-namespace YelpDataLoader
+namespace YelpDataETL.Loaders
 {
     public class ReviewLoader
     {
@@ -31,19 +31,19 @@ namespace YelpDataLoader
 
         public static void Load(IDbConnection connection)
         {
+            Console.WriteLine($"{nameof(ReviewLoader)} - Starting load...");
+
             var objs = File
                 .ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_review"))
-                .Select(x => JsonConvert.DeserializeObject(x))
-                .Select(x =>
-                {
+                .Select(JsonConvert.DeserializeObject)
+                .Select(x => {
                     dynamic obj = x;
 
-                    return new
-                    {
+                    return new {
                         obj.business_id,
                         obj.user_id,
                         obj.stars,
-                        obj.text,
+                        text = (string)null,
                         obj.date,
                         votes_funny = obj.votes?.funny,
                         votes_useful = obj.votes?.useful,
@@ -53,17 +53,29 @@ namespace YelpDataLoader
 
             connection.Open();
 
+            var transaction = connection.BeginTransaction();
+
             try
             {
-                connection.Execute(_sql, objs);
+                connection.Execute(_sql, objs, transaction);
+
+                transaction.Commit();
+                Console.WriteLine($"{nameof(ReviewLoader)} - Load complete.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{nameof(ReviewLoader)} - ERROR: {ex.Message}. Rolling back...");
+                transaction.Rollback();
+                Console.WriteLine($"{nameof(ReviewLoader)} - Rollback complete.");
+
+                throw;
             }
             finally
             {
+                transaction.Dispose();
                 connection.Close();
                 connection.Dispose();
-            }
-
-            Console.WriteLine("Completed loading review data...");
+            }           
         }
     }
 }

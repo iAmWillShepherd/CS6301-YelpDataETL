@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Dapper;
 
-namespace YelpDataLoader
+namespace YelpDataETL.Loaders
 {
     public class CheckinLoader
     {
@@ -68,8 +68,10 @@ namespace YelpDataLoader
 
         public static void Load(IDbConnection connection)
         {
+            Console.WriteLine($"{nameof(CheckinLoader)} - Starting load...");
+
             var objs = File.ReadLines(Helpers.GetFullFilename("yelp_academic_dataset_checkin"))
-                .Select(x => JsonConvert.DeserializeObject(x))
+                .Select(JsonConvert.DeserializeObject)
                 .Select(x =>
                 {
                     dynamic obj = x;
@@ -80,7 +82,7 @@ namespace YelpDataLoader
                         checkinInfo = new Dictionary<int, List<int>>()
                     };
 
-                    for (int i = 0; i < 7; i++)
+                    for (var i = 0; i < 7; i++)
                     {
                         record.checkinInfo.Add(i, new int[24].ToList());
                     }
@@ -103,14 +105,15 @@ namespace YelpDataLoader
 
             connection.Open();
 
+            var transaction = connection.BeginTransaction();
+
             try
             {
                 foreach (var obj in objs)
                 {
                     foreach (var kvp in obj.checkinInfo)
                     {
-                        connection.Execute(_sql, new
-                        {
+                        connection.Execute(_sql, new {
                             obj.business_id,
                             day_of_week_id = kvp.Key,
                             hour_0 = kvp.Value[0],
@@ -137,17 +140,26 @@ namespace YelpDataLoader
                             hour_21 = kvp.Value[21],
                             hour_22 = kvp.Value[22],
                             hour_23 = kvp.Value[23]
-                        });
+                        }, transaction);
                     }
                 }
+
+                transaction.Commit();
+                Console.WriteLine($"{nameof(CheckinLoader)} - Load complete");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{nameof(CheckinLoader)} - ERROR: {ex.Message}. Rolling back...");
+                transaction.Rollback();
+                Console.WriteLine($"{nameof(CheckinLoader)} - Rollback complete.");
+
+                throw;
             }
             finally
             {
                 connection.Close();
                 connection.Dispose();
-            }
-
-            Console.WriteLine("Completed loading checkin data...");
+            }            
         }
     }
 }

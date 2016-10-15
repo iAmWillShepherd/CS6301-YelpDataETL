@@ -73,9 +73,7 @@ namespace YelpDataETL.Loaders
 
             var businesses = records as IList<Business> ?? records.ToList();
 
-            connection.Open();
-
-            CreateCategoryAndArributeTables(connection, businesses);    //disposing connection here until code is refactored
+            CreateCategoryAndArributeTables(businesses);    //disposing connection here until code is refactored
             InsertBusinessData(businesses);
 
             Console.WriteLine($"{nameof(BusinessLoader)} - Load complete.");
@@ -170,7 +168,7 @@ namespace YelpDataETL.Loaders
                 conn.Close();
                 conn.Dispose();
             }
-
+   
             conn = Helpers.CreateConnectionToYelpDb();
 
             conn.Open();
@@ -239,7 +237,7 @@ namespace YelpDataETL.Loaders
             }
         }
 
-        private static void CreateCategoryAndArributeTables(IDbConnection connection, IList<Business> businesses)
+        private static void CreateCategoryAndArributeTables(IList<Business> businesses)
         {
             var attributes = businesses
                 .SelectMany(x => x.Attributes)
@@ -250,6 +248,7 @@ namespace YelpDataETL.Loaders
                 .Distinct();
 
             var sqlScripts = BuildAtrributeTables(attributes).Union(BuildCategoryTables(categories));
+            var connection = Helpers.CreateConnectionToYelpDb();
 
             connection.Open();
             var transaction = connection.BeginTransaction();
@@ -276,6 +275,7 @@ namespace YelpDataETL.Loaders
             {
                 transaction.Dispose();
                 connection.Close();
+                connection.Dispose();
             }
         }
 

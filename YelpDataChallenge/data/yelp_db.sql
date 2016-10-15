@@ -25,11 +25,11 @@ DROP TABLE IF EXISTS `business`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `business` (
-  `business_id` varchar(45) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `full_address` varchar(150) DEFAULT NULL,
-  `city` varchar(45) DEFAULT NULL,
-  `state` varchar(5) DEFAULT NULL,
+  `business_id` varchar(45) CHARACTER SET utf8 NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8 NOT NULL,
+  `full_address` varchar(150) CHARACTER SET utf8 DEFAULT NULL,
+  `city` varchar(45) CHARACTER SET utf8 DEFAULT NULL,
+  `state` varchar(5) CHARACTER SET utf8 DEFAULT NULL,
   `longitude` float DEFAULT NULL,
   `latitude` float DEFAULT NULL,
   `stars` float DEFAULT '0',
@@ -47,8 +47,8 @@ DROP TABLE IF EXISTS `business_hour`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `business_hour` (
-  `business_id` varchar(45) NOT NULL,
-  `day` varchar(10) NOT NULL,
+  `business_id` varchar(45) CHARACTER SET utf8 NOT NULL,
+  `day` varchar(10) CHARACTER SET utf8 NOT NULL,
   `open` time DEFAULT NULL,
   `close` time DEFAULT NULL,
   PRIMARY KEY (`business_id`,`day`)
@@ -104,13 +104,16 @@ CREATE TABLE `review` (
   `business_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `user_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `stars` decimal(2,1) NOT NULL,
-  `text` text NOT NULL,
+  `text` text CHARACTER SET 'utf8' NOT NULL,
   `date` date NOT NULL,
   `votes_funny` int(11) DEFAULT '0',
   `votes_useful` int(11) DEFAULT '0',
   `votes_cool` int(11) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+ALTER TABLE `review` MODIFY COLUMN `text` text
+    CHARACTER SET 'utf8' COLLATE 'utf8_general_ci' NOT NULL;
 
 --
 -- Table structure for table `tip`
@@ -153,7 +156,7 @@ DROP TABLE IF EXISTS `user_compliment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user_compliment` (
-  `user_id` varchar(45) NOT NULL,
+  `user_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `profile` int(11) NOT NULL,
   `cute` int(11) NOT NULL,
   `funny` int(11) NOT NULL,
@@ -176,7 +179,7 @@ DROP TABLE IF EXISTS `user_elite_status`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user_elite_status` (
-  `user_id` varchar(45) NOT NULL,
+  `user_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `year` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -189,8 +192,8 @@ DROP TABLE IF EXISTS `user_friend`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user_friend` (
-  `user_id` varchar(45) NOT NULL,
-  `friend_user_id` varchar(45) NOT NULL
+  `user_id` varchar(45) CHARACTER SET utf8 NOT NULL,
+  `friend_user_id` varchar(45) CHARACTER SET utf8 NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -202,7 +205,7 @@ DROP TABLE IF EXISTS `user_vote`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user_vote` (
-  `user_id` varchar(45) NOT NULL,
+  `user_id` varchar(45) CHARACTER SET utf8 NOT NULL,
   `funny` int(11) DEFAULT '0',
   `useful` int(11) DEFAULT '0',
   `cool` int(11) DEFAULT '0'

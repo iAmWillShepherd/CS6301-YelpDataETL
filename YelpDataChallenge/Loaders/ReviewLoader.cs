@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Linq;
 using System.IO;
+using System.Text;
 using Newtonsoft.Json;
 using Dapper;
 
@@ -43,7 +44,7 @@ namespace YelpDataETL.Loaders
                         obj.business_id,
                         obj.user_id,
                         obj.stars,
-                        text = (string)null,
+                        text = Encoding.UTF8.GetBytes((string)obj.text),
                         obj.date,
                         votes_funny = obj.votes?.funny,
                         votes_useful = obj.votes?.useful,
